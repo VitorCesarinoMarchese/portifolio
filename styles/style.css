@@ -120,19 +120,6 @@ section p{
     justify-content: space-between;
     margin-bottom: 45px;
 }
-.desktop img{
-    width: 800px;
-    height: 430px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border: solid #232323 6px;
-}
-.mobile img{
-    width: 400px;
-    height: 810px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-}
 .title-project{
     margin-bottom: 10px;
 }
@@ -147,6 +134,33 @@ section p{
     margin-bottom: 15px;
     color: #382017;
 }
+.phone-div{  
+    height: 500px;
+  }
+.phone, .phone img {
+    height: 100%;
+  }
+.phone img {
+    border: 0.4rem solid #000000;
+    border-radius: 35px;
+  }
+  .desktop-div{  
+    height: 500px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+.desktop, .desktop img {
+    height: 100%;
+  }
+.desktop img {
+    border: 0.4rem solid #000000;
+    border-radius: 35px;
+  }
+  .monitor{
+    height: 20px;
+    background-color: #afafaf;
+    border-radius: 0px 0px 5px 5px;
+  }
 .footer{
     border-top: 1px solid var(--main-text-color);
     width: 100vw;
