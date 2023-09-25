@@ -1,0 +1,41 @@
+@use './variables'
+
+footer
+    height: 12rem
+    display: flex
+    justify-content: center
+    align-items: center
+    margin-top: 2.5rem
+    width: 100%
+    border-top: solid variables.$LightBlue
+    color:  variables.$LightBlue
+    .github
+        margin-right: 0.5rem
+    span
+        font-size: 2rem
+        font-weight: 700
+        max-width: 15rem
+    a
+        text-decoration: none
+        color: variables.$LightBlue
+        opacity: 0.8
+        font-size: 1rem
+        &:hover, svg:hover, .darker:hover
+            color: darken(variables.$LightBlue, 25)
+            fill: darken(variables.$LightBlue, 25)
+.FooterContent
+    display: flex 
+    flex-direction: row
+    justify-content: space-around
+    width: 55rem
+    li
+        list-style: none
+        margin-bottom: 1rem
+    p
+        font-size: 1rem
+.title
+    font-size: 1.2rem
+    font-weight: 700
+.opacity
+    opacity: 0.7
+    font-size: 0.8rem
