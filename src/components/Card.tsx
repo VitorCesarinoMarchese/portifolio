@@ -24,13 +24,13 @@ function Card(){
         <div className='row'>
             <div className='card'>
                 <img src={backend} alt="" className='icon'/>
-                <h2>Backend</h2>
+                <span>Backend</span>
                 <p>Gosto de resolver problemas que envolvem logica</p>
 
-                <h2>Linguanges Familiares</h2>
+                <span>Linguanges Familiares</span>
                 <img src={go} alt="" className='go'/>
 
-                <h2>Dev Tools</h2>
+                <span>Dev Tools</span>
                 <ul>
                     <li><img src={sqlite} alt="" /></li>
                     <li><img src={git} alt="" /></li>
@@ -40,17 +40,17 @@ function Card(){
             </div>
             <div className='card'>
                 <img src={frontend} alt="" className='icon'/>
-                <h2>Frontend</h2>
+                <span>Frontend</span>
                 <p>Gosto de transformar ideias em realidade usando codigo</p>
 
-                <h2>Linguanges Familiares</h2>
+                <span>Linguanges Familiares</span>
                 <div className='linguagens'>
                     <img src={html} alt="" />
                     <img src={css} alt="" />
                     <img src={ts} alt="" />
                 </div>
 
-                <h2>Dev Tools</h2>
+                <span>Dev Tools</span>
                 <ul>
                     <li><img src={react} alt="" /></li>
                     <li><img src={sass} alt="" /></li>
