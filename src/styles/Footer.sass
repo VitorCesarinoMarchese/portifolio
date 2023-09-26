@@ -20,17 +20,18 @@ footer
         color: variables.$LightBlue
         opacity: 0.8
         font-size: 1rem
-        &:hover, svg:hover, .darker:hover
+        &:hover, svg:hover
             color: darken(variables.$LightBlue, 25)
             fill: darken(variables.$LightBlue, 25)
 .FooterContent
     display: flex 
     flex-direction: row
     justify-content: space-around
-    width: 55rem
+    width: 70rem
     li
         list-style: none
         margin-bottom: 1rem
+        max-width: 18rem
     p
         font-size: 1rem
 .title
@@ -38,4 +39,7 @@ footer
     font-weight: 700
 .opacity
     opacity: 0.7
-    font-size: 0.8rem
+.row
+    display: flex
+    flex-direction: row
+    justify-content: space-between
