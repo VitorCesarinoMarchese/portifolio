@@ -16,18 +16,13 @@ function NavBar() {
         >
           <img src={hamburguer} alt="menu" />
         </button>
-        <ul
-        style={{display: active ? "flex" : "none"}}
+        <button
+          style={{ display: active ? "flex" : "none" }}
+          onClick={() => SetActive(false)}
         >
-          <li>
-            <button>
-              <img
-                src={fillhamburguer}
-                alt=""
-                onClick={() => SetActive(false)}
-              />
-            </button>
-          </li>
+          <img src={fillhamburguer} />
+        </button>
+        <ul>
           <li>
             <a href="#Sobre">Sobre</a>
           </li>
@@ -39,6 +34,18 @@ function NavBar() {
           </li>
         </ul>
       </nav>
+      <ul className="menu" style={{ left: active ? "0px" : "100000px" }}>
+        <li></li>
+        <li>
+          <a href="#Sobre">Sobre</a>
+        </li>
+        <li>
+          <a href="#Projetos">Meus Projetos</a>
+        </li>
+        <li>
+          <a href="#Contatos">Contatos</a>
+        </li>
+      </ul>
     </div>
   );
 }
