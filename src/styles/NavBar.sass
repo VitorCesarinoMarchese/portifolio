@@ -25,7 +25,7 @@
             text-decoration: none
             &:hover
                 color: darken(variables.$LightBlue, 20)
-.NavBtn
+.none
     display: none
 
 
@@ -46,11 +46,10 @@
     button
         border: none
         background: none
-    .main
-        display: none
     .menu
+        display: flex
         position: relative
-        z-index: 10 
+        z-index: 2 
         list-style: none
         flex-direction: column
         align-items: center
@@ -59,3 +58,5 @@
             text-decoration: none
             &:hover
                 color: darken(variables.$LightBlue, 20)
+    .active
+        display: flex

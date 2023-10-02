@@ -9,19 +9,6 @@ function NavBar() {
     <div className="nav">
       <nav>
         <span>Vitor Cesarino Marchese</span>
-        <button
-          style={{ display: active ? "none" : "flex" }}
-          className="NavBtn"
-          onClick={() => SetActive(true)}
-        >
-          <img src={hamburguer} alt="menu" />
-        </button>
-        <button
-          style={{ display: active ? "flex" : "none" }}
-          onClick={() => SetActive(false)}
-        >
-          <img src={fillhamburguer} />
-        </button>
         <ul>
           <li>
             <a href="#Sobre">Sobre</a>
@@ -33,9 +20,20 @@ function NavBar() {
             <a href="#Contatos">Contatos</a>
           </li>
         </ul>
+        <button
+          className={active ? "none": "NavBtn"}
+          onClick={() => SetActive(true)}
+        >
+          <img src={hamburguer} alt="menu" />
+        </button>
+        <button
+          className={active ? "active": "none"}
+          onClick={() => SetActive(false)}
+        >
+          <img src={fillhamburguer} />
+        </button>
       </nav>
-      <ul className="menu" style={{ left: active ? "0px" : "100000px" }}>
-        <li></li>
+      <ul className={active ? "menu": "none"} >
         <li>
           <a href="#Sobre">Sobre</a>
         </li>
