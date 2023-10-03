@@ -9,7 +9,19 @@ function NavBar() {
     <div className="nav">
       <nav>
         <span>Vitor Cesarino Marchese</span>
-        <ul>
+        <button
+          className={active ? "none": "NavBtn"}
+          onClick={() => SetActive(true)}
+        >
+          <img src={hamburguer} alt="menu" />
+        </button>
+        <button
+          className={active ? "NavBtn": "none"}
+          onClick={() => SetActive(false)}
+        >
+          <img src={fillhamburguer} />
+        </button>
+        <ul className={active ? "active": "none"}>
           <li>
             <a href="#Sobre">Sobre</a>
           </li>
@@ -20,30 +32,7 @@ function NavBar() {
             <a href="#Contatos">Contatos</a>
           </li>
         </ul>
-        <button
-          className={active ? "none": "NavBtn"}
-          onClick={() => SetActive(true)}
-        >
-          <img src={hamburguer} alt="menu" />
-        </button>
-        <button
-          className={active ? "active": "none"}
-          onClick={() => SetActive(false)}
-        >
-          <img src={fillhamburguer} />
-        </button>
       </nav>
-      <ul className={active ? "menu": "none"} >
-        <li>
-          <a href="#Sobre">Sobre</a>
-        </li>
-        <li>
-          <a href="#Projetos">Meus Projetos</a>
-        </li>
-        <li>
-          <a href="#Contatos">Contatos</a>
-        </li>
-      </ul>
     </div>
   );
 }

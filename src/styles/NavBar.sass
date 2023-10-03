@@ -17,7 +17,7 @@
             flex-direction: row
             justify-content: space-around
             max-width: 30rem
-            min-width: 10rem
+            min-width: 15rem
             font-size: 1.5rem
             list-style: none
         a
@@ -27,6 +27,8 @@
                 color: darken(variables.$LightBlue, 20)
 .none
     display: none
+.NavBtn
+    display: none
 
 
 @media (max-width: variables.$MobileWidth)
@@ -35,28 +37,26 @@
         background: none
         border: none
     .nav
+        .active
+            height: 100%
+            background-color: #fff
+            position: absolute
+            right: 0
+            top: 2.5rem
+            z-index: 1
+            display: flex
+            align-items: flex-end
+            justify-content: flex-start
+            flex-direction: column
+            li
+                margin-right: 1rem
+            
+            
+        .none
+            display: none
         span
             font-size: 1rem
         nav
             padding: 0.5rem 1rem 0rem 1rem
-            ul
-                display: none
-        a
-            font-size: 1rem
-    button
-        border: none
-        background: none
-    .menu
-        display: flex
-        position: relative
-        z-index: 2 
-        list-style: none
-        flex-direction: column
-        align-items: center
-        a
-            color: variables.$LightBlue
-            text-decoration: none
-            &:hover
-                color: darken(variables.$LightBlue, 20)
-    .active
-        display: flex
+    
+
