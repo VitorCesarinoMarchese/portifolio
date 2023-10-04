@@ -23,13 +23,13 @@
         a
             color: variables.$LightBlue
             text-decoration: none
+            transition: color 0.5s
             &:hover
                 color: darken(variables.$LightBlue, 20)
 .none
     display: none
 .NavBtn
     display: none
-
 
 @media (max-width: variables.$MobileWidth)
     .NavBtn
@@ -50,8 +50,6 @@
             flex-direction: column
             li
                 margin-right: 1rem
-            
-            
         .none
             display: none
         span

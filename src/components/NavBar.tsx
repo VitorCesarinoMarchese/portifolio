@@ -1,6 +1,5 @@
 import { useState } from "react";
-import hamburguer from "../assets/hamburguer.svg";
-import fillhamburguer from "../assets/fillhamburguer.svg";
+import { Hamburger } from "phosphor-react";
 import "../styles/NavBar.sass";
 
 function NavBar() {
@@ -10,26 +9,32 @@ function NavBar() {
       <nav>
         <span>Vitor Cesarino Marchese</span>
         <button
-          className={active ? "none": "NavBtn"}
+          className={active ? "none" : "NavBtn"}
           onClick={() => SetActive(true)}
         >
-          <img src={hamburguer} alt="menu" />
+          <Hamburger size={32} color="#53a8b2"/>
         </button>
         <button
-          className={active ? "NavBtn": "none"}
+          className={active ? "NavBtn" : "none"}
           onClick={() => SetActive(false)}
         >
-          <img src={fillhamburguer} />
+          <Hamburger size={32} color="#53a8b2" weight="fill" />
         </button>
-        <ul className={active ? "active": "none"}>
+        <ul className={active ? "active" : "none"}>
           <li>
-            <a href="#Sobre">Sobre</a>
+            <a href="#Sobre" onClick={() => SetActive(false)}>
+              Sobre
+            </a>
           </li>
           <li>
-            <a href="#Projetos">Meus Projetos</a>
+            <a href="#Projetos" onClick={() => SetActive(false)}>
+              Meus Projetos
+            </a>
           </li>
           <li>
-            <a href="#Contatos">Contatos</a>
+            <a href="#Contatos" onClick={() => SetActive(false)}>
+              Contatos
+            </a>
           </li>
         </ul>
       </nav>
