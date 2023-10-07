@@ -1,7 +1,7 @@
 @use './variables'
 
 footer
-    min-height: 12rem
+    height: 12rem
     display: flex
     justify-content: center
     align-items: center
@@ -20,48 +20,36 @@ footer
         color: variables.$LightBlue
         opacity: 0.8
         font-size: 1rem
-        transition: color 0.5s
-        &:hover
+        &:hover, svg:hover
             color: darken(variables.$LightBlue, 25)
-            svg
-                fill: darken(variables.$LightBlue, 25)
-            polyline, path
-                stroke: darken(variables.$LightBlue, 25)
-    polyline, path
-        transition: stroke 0.5s
-    svg
-        transition: fill 0.5s
-
-
-
+            fill: darken(variables.$LightBlue, 25)
 .FooterContent
     display: flex 
     flex-direction: row
     justify-content: space-around
-    width: 100%
+    width: 70rem
     li
         list-style: none
         margin-bottom: 1rem
-        max-width: 18rem
+        max-width: 20rem
     p
         font-size: 1rem
-.title
-    font-size: 1.2rem
-    font-weight: 700
+    .title
+        font-size: 1.2rem
+        font-weight: 700
 .opacity
     opacity: 0.7
 .row
     display: flex
     flex-direction: row
     justify-content: space-between
-
-@media( max-width:  variables.$MobileWidth)
+@media (max-width: variables.$MobileWidth)
+    footer
+        height: 30rem
     .FooterContent
         flex-direction: column
-        align-items: center
-        span
-            margin-top: 1.25rem
-    .social-container
-        display: flex
-        flex-direction: column
-        align-items: center
+        width: 15rem
+        .title
+            font-size: 1.125rem
+        a, p
+            font-size: 0.875rem

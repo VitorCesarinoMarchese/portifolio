@@ -16,20 +16,19 @@
             display: flex
             flex-direction: row
             justify-content: space-around
-            max-width: 30rem
-            min-width: 15rem
+            min-width: 25rem
             font-size: 1.5rem
             list-style: none
         a
             color: variables.$LightBlue
             text-decoration: none
-            transition: color 0.5s
             &:hover
                 color: darken(variables.$LightBlue, 20)
-.none
-    display: none
 .NavBtn
     display: none
+.none
+    display: none
+
 
 @media (max-width: variables.$MobileWidth)
     .NavBtn
@@ -37,6 +36,9 @@
         background: none
         border: none
     .nav
+        nav
+            ul
+                min-width: 50%
         .active
             height: 100%
             background-color: #fff
@@ -50,6 +52,7 @@
             flex-direction: column
             li
                 margin-right: 1rem
+                margin-bottom: 1rem
         .none
             display: none
         span

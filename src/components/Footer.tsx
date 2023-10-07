@@ -1,12 +1,14 @@
-import { GithubLogo, LinkedinLogo, CaretUp } from "phosphor-react";
+import { CaretUp, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
+
 import "../styles/Footer.sass";
 
 function Footer() {
+
   return (
     <footer>
-      <div className="FooterContent">
+      <div className="FooterContent" id="Contatos">
         <span>Vitor Cesarino Marchese</span>
-        <ul className="navegacao-container">
+        <ul>
           <li>
             <p className="title">Navegacao</p>
           </li>
@@ -24,19 +26,17 @@ function Footer() {
         </ul>
         <ul>
           <li>
-            <p className="title" id="Contatos">
-              Contatos
-            </p>
+            <p className="title">Contatos</p>
           </li>
           <li className="row">
-            <p className="opacity">Telefone:</p> <p>{"(11)"} 98755-1050</p>
+            <p className="opacity">Telefone:</p><p>{"(11)"} 98755-1050</p>
           </li>
           <li className="row">
             <p className="opacity">Email:</p>
             <p>vitorcesarino1@gmail.com</p>
           </li>
         </ul>
-        <ul className="social-container">
+        <ul>
           <li>
             <p className="title">Social</p>
           </li>
@@ -46,13 +46,13 @@ function Footer() {
               target="_blank"
               className="github"
             >
-              <GithubLogo size={32} color="#53A8B2" />
+              <GithubLogo size={32} color="#53a8b2" weight="fill" />
             </a>
             <a
               href="https://www.linkedin.com/in/vitor-cesarino/"
               target="_blank"
             >
-              <LinkedinLogo size={32} color="#53A8B2" weight="fill"/>
+              <LinkedinLogo size={32} color="#53a8b2" weight="fill"/>
             </a>
           </li>
         </ul>

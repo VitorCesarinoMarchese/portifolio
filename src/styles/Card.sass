@@ -32,7 +32,7 @@
         width: 12rem
         li
             max-height: 50px
-.row
+.card-direction
     width: 31rem
     display: flex
     flex-direction: row
@@ -48,3 +48,7 @@
         max-height: 50px
 .go
     margin-bottom: 0.25rem
+@media (max-width: variables.$MobileWidth)
+    .card-direction
+        width: 15rem
+        flex-direction: column

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Hamburger } from "phosphor-react";
+import { Hamburger } from "@phosphor-icons/react";
+
 import "../styles/NavBar.sass";
 
 function NavBar() {
@@ -12,13 +13,13 @@ function NavBar() {
           className={active ? "none" : "NavBtn"}
           onClick={() => SetActive(true)}
         >
-          <Hamburger size={32} color="#53a8b2"/>
+          <Hamburger size={32} color="#53a8b2" />{" "}
         </button>
         <button
           className={active ? "NavBtn" : "none"}
           onClick={() => SetActive(false)}
         >
-          <Hamburger size={32} color="#53a8b2" weight="fill" />
+          <Hamburger size={32} color="#53a8b2" weight="fill" />{" "}
         </button>
         <ul className={active ? "active" : "none"}>
           <li>
