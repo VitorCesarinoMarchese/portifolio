@@ -1,11 +1,9 @@
-import backend from '../assets/backend.svg'
 import go from '../assets/go.svg'
 import sqlite from '../assets/sqlite.svg'
 import git from '../assets/git.svg'
 import gorm from '../assets/gorm.svg'
 import fiber from '../assets/fiber.svg'
 
-import frontend from '../assets/frontend.svg'
 import html from '../assets/hmtl.svg'
 import css from '../assets/css.svg'
 import ts from '../assets/ts.svg'
@@ -14,16 +12,15 @@ import sass from '../assets/sass.svg'
 import tailwind from '../assets/tailwind.svg'
 import vite from '../assets/vite.svg'
 
-
-
+import { Code, BracketsCurly } from '@phosphor-icons/react'
 
 import '../styles/Card.sass'
 
 function Card(){
     return(
-        <div className='row'>
+        <div className='card-direction'>
             <div className='card'>
-                <img src={backend} alt="" className='icon'/>
+                <BracketsCurly size={64} color="#53a8b2" weight='light' className='icon'/>
                 <span>Backend</span>
                 <p>Gosto de resolver problemas que envolvem logica</p>
 
@@ -39,7 +36,7 @@ function Card(){
                 </ul>
             </div>
             <div className='card'>
-                <img src={frontend} alt="" className='icon'/>
+                <Code size={64} color="#53a8b2" weight='light' className='icon'/>
                 <span>Frontend</span>
                 <p>Gosto de transformar ideias em realidade usando codigo</p>
 
