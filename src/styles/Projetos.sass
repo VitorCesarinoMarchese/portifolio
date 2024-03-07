@@ -1,11 +1,24 @@
 @use "./variables"
 
-
 .Projetos
     display: flex
     flex-direction: column
     margin-top: 2.5rem
     width: 30rem
+    a
+        text-decoration: none
+        color: #000000
+        transition: color 0.5s ease
+        &:hover
+            h3
+                color: darken(variables.$LightBlue, 20)
+            span
+                color: darken(variables.$LightBlue, 20)
+            .danger
+                color: darken(#FFA800, 20)
+            .success
+                color: darken(#05FF00, 20)
+
     h2
         color: variables.$LightBlue
         font-size: 3rem
@@ -17,26 +30,29 @@
     display: flex
     flex-direction: row
 .mt
-
     margin-top: 1.25rem
 .Detalhes
     display: flex
     flex-direction: column
     margin-left: 1.25rem
     h3
+        transition: color 0.5s ease
         color: variables.$LightBlue
         font-size: 1.5rem
         font-weight: 700
     span
-        color:  variables.$LightBlue
+        transition: color 0.5s ease
+        color: variables.$LightBlue
         font-size: 1rem
         font-weight: 700
         margin-top: 0.3rem
     p
         font-size: 0.875rem
     .danger
+        transition: color 0.5s ease
         color: #FFA800
     .success
+        transition: color 0.5s ease
         color: #05FF00
 @media (max-width: variables.$MobileWidth)
     .Projetos
@@ -49,4 +65,3 @@
         p
             font-size: 0.75rem
             width: 12.5rem
-    
