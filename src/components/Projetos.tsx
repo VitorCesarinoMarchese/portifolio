@@ -1,35 +1,35 @@
 import "../styles/Projetos.sass";
-import ToGoApp from "../assets/ToGoApp.png";
+import ColdeLabs from "../assets/ColdeLabs.png";
 import Floricultura from "../assets/Floricultura.png";
 
 function Projetos() {
   return (
     <div className="Projetos" id="Projetos">
       <h2>Meus Projetos</h2>
-      <a href="https://github.com/VitorCesarinoMarchese/ToGoApp">
+      <a href="https://coldelabs.com/" target="_blank">
         <div className="Projeto">
-          <img src={ToGoApp} alt="" />
+          <img src={ColdeLabs} alt="ColdeLabs" />
           <div className="Detalhes">
-            <h3>ToGoApp</h3>
+            <h3>ColdeLabs</h3>
             <p>
-              Um site com uma To do list que utilizei para aprender o
-              funcionamento de um CRUD{"(create, read, update)"} na linguagem GO,
-              alem de aprender a implementar meu backend com fron-end.
+              A Codelabs é uma plataforma educacional que torna o aprendizado de
+              programação envolvente e acessível para crianças e professores,
+              com metodologia comparativa e funcionalidades gamificadas.
             </p>
             <span>Status</span>
-            <p className="danger">Em desenvolvimento</p>
+            <p className="success">Concluido</p>
           </div>
         </div>
       </a>
-      <a href="https://github.com/VitorCesarinoMarchese/FloriculturaReact">
+      <a href="https://rosemarry-8b3cd.web.app/" target="_blank">
         <div className="Projeto mt">
-          <img src={Floricultura} alt="" />
+          <img src={Floricultura} alt="Floricultura"/>
           <div className="Detalhes">
             <h3>RoseMarry</h3>
             <p>
               Um site em que utilizei sua criacao para aprender o basico de como
-              React e Sass funcionam, utilizando o react-router-dom para gerenciar
-              as rotas.
+              React e Sass funcionam, utilizando o react-router-dom para
+              gerenciar as rotas.
             </p>
             <span>Status</span>
             <p className="success">Concluido</p>
