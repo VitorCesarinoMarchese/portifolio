@@ -6,7 +6,7 @@ function Projetos() {
   return (
     <div className="Projetos" id="Projetos">
       <h2>Meus Projetos</h2>
-      <a href="https://coldelabs.com/" target="_blank">
+      <a href="https://coldelabs.web.app/" target="_blank">
         <div className="Projeto">
           <img src={ColdeLabs} alt="ColdeLabs" />
           <div className="Detalhes">
