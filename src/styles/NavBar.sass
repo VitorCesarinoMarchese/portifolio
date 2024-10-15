@@ -22,6 +22,7 @@
         a
             color: variables.$LightBlue
             text-decoration: none
+            transition: color 0.5s
             &:hover
                 color: darken(variables.$LightBlue, 20)
 .NavBtn
@@ -30,7 +31,7 @@
     display: none
 
 
-@media (max-width: variables.$MobileWidth)
+@media (max-width: 950px)
     .NavBtn
         display: flex
         background: none
@@ -38,10 +39,9 @@
         cursor: pointer
     .nav
         nav
-            ul
-                min-width: 50%
         .active
             height: 100%
+            padding: 24px
             background-color: #fff
             position: absolute
             right: 0

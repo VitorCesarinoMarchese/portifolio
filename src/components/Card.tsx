@@ -22,7 +22,7 @@ function Card(){
             <div className='card'>
                 <BracketsCurly size={64} color="#53a8b2" weight='light' className='icon'/>
                 <span>Backend</span>
-                <p>Gosto de resolver problemas que envolvem logica</p>
+                <p>Gosto de entender como as coisa funcionam por debaixo do capo</p>
 
                 <span>Linguanges Familiares</span>
                 <img src={go} alt="" className='go'/>

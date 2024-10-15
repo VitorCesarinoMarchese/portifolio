@@ -33,7 +33,7 @@ function Footer() {
           </li>
           <li className="row">
             <p className="opacity">Email:</p>
-            <p>vitorcesarino1@gmail.com</p>
+            <p>&nbsp;vitorcesarino1@gmail.com</p>
           </li>
         </ul>
         <ul>
