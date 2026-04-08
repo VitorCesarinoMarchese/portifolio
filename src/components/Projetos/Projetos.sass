@@ -1,0 +1,45 @@
+@use "../../styles/variables"
+
+.Projetos
+  display: flex
+  flex-direction: column
+  margin-top: 2.5rem
+  width: 30rem
+
+  a
+    text-decoration: none
+    color: #000000
+    transition: color 0.5s ease
+
+    &:hover
+      // hover effects that change the child Projeto card
+      h3
+        color: darken(variables.$LightBlue, 20)
+      span
+        color: darken(variables.$LightBlue, 20)
+      .danger
+        color: darken(#FFA800, 20)
+      .success
+        color: darken(#05FF00, 20)
+
+  h2
+    color: variables.$LightBlue
+    font-size: 3rem
+    font-weight: 700
+    margin-bottom: 0.5rem
+
+  img
+    max-height: 15rem
+
+.mt
+  margin-top: 1.25rem
+
+@media (max-width: variables.$MobileWidth)
+  .Projetos
+    width: 20rem
+
+    h2
+      font-size: 2rem
+
+    img
+      height: 12.5rem

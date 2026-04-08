@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Hamburger } from "@phosphor-icons/react";
 
-import "../styles/NavBar.sass";
+import "./NavBar.sass";
 
 function NavBar() {
   const [active, SetActive] = useState(false);

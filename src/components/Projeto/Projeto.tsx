@@ -1,6 +1,6 @@
-import "../styles/Projetos.sass";
+import "./Projeto.sass";
 
-function Projeto({img, title, desc} :{img: string, title:string, desc: string}) {
+function Projeto({ img, title, desc }: { img: string, title: string, desc: string }) {
   return (
     <>
       <div className="Projeto">

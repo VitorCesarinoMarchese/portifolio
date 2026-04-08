@@ -1,6 +1,6 @@
 import { CaretUp, GithubLogo, LinkedinLogo } from "@phosphor-icons/react";
 
-import "../styles/Footer.sass";
+import "./Footer.sass";
 
 function Footer() {
 
@@ -52,7 +52,7 @@ function Footer() {
               href="https://www.linkedin.com/in/vitor-cesarino/"
               target="_blank"
             >
-              <LinkedinLogo size={32} color="#53a8b2" weight="fill"/>
+              <LinkedinLogo size={32} color="#53a8b2" weight="fill" />
             </a>
           </li>
         </ul>

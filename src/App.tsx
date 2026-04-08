@@ -1,21 +1,21 @@
-import NavBar  from "./components/NavBar";
-import FullStack from "./components/FullStack";
-import Sobre from "./components/Sobre";
-import Projetos from "./components/Projetos";
-import Footer from "./components/Footer";
+import NavBar from "./components/NavBar/NavBar";
+import FullStack from "./components/FullStack/FullStack";
+import Sobre from "./components/Sobre/Sobre";
+import Projetos from "./components/Projetos/Projetos";
+import Footer from "./components/Footer/Footer";
 import './styles/App.sass'
 
 function App() {
 
   return (
     <div className="center">
-    <NavBar/>
-    <div className="main">
-      <FullStack/>
-      <Sobre/>
-      <Projetos/>
-    </div>
-      <Footer/>
+      <NavBar />
+      <div className="main">
+        <FullStack />
+        <Sobre />
+        <Projetos />
+      </div>
+      <Footer />
     </div>
   )
 }
