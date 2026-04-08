@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Hamburger } from "@phosphor-icons/react";
+import { ListIcon, XIcon } from "@phosphor-icons/react";
 
 import "./NavBar.sass";
 
@@ -13,13 +13,13 @@ function NavBar() {
           className={active ? "none" : "NavBtn"}
           onClick={() => SetActive(true)}
         >
-          <Hamburger size={32} color="#53a8b2" />{" "}
+          <ListIcon size={32} color="#53a8b2" />{" "}
         </button>
         <button
           className={active ? "NavBtn" : "none"}
           onClick={() => SetActive(false)}
         >
-          <Hamburger size={32} color="#53a8b2" weight="fill" />{" "}
+          <XIcon size={32} color="#53a8b2" />{" "}
         </button>
         <ul className={active ? "active" : "none"}>
           <li>
