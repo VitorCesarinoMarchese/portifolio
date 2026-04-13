@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   contacts,
@@ -13,6 +13,7 @@ import { AppWindow, type WindowPosition } from './AppWindow.tsx'
 import { PlasmaWallpaper } from './PlasmaWallpaper.tsx'
 
 type DesktopAppId = 'projects' | 'about' | 'contact' | 'cv' | 'skills'
+type WindowMode = 'closed' | 'open' | 'minimized'
 
 interface DesktopAppDefinition {
   id: DesktopAppId
@@ -20,9 +21,11 @@ interface DesktopAppDefinition {
 }
 
 interface WindowState {
-  isOpen: boolean
+  mode: WindowMode
   position: WindowPosition
   zIndex: number
+  isMaximized: boolean
+  restorePosition: WindowPosition | null
 }
 
 type WindowStateMap = Record<DesktopAppId, WindowState>
@@ -49,29 +52,39 @@ const getInitialIsMobile = (): boolean => window.matchMedia(DESKTOP_MEDIA_QUERY)
 
 const createInitialWindowState = (): WindowStateMap => ({
   projects: {
-    isOpen: false,
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.projects },
     zIndex: 31,
+    isMaximized: false,
+    restorePosition: null,
   },
   about: {
-    isOpen: true,
+    mode: 'open',
     position: { ...INITIAL_WINDOW_POSITIONS.about },
     zIndex: 32,
+    isMaximized: false,
+    restorePosition: null,
   },
   contact: {
-    isOpen: false,
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.contact },
     zIndex: 33,
+    isMaximized: false,
+    restorePosition: null,
   },
   cv: {
-    isOpen: false,
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.cv },
     zIndex: 34,
+    isMaximized: false,
+    restorePosition: null,
   },
   skills: {
-    isOpen: false,
+    mode: 'closed',
     position: { ...INITIAL_WINDOW_POSITIONS.skills },
     zIndex: 35,
+    isMaximized: false,
+    restorePosition: null,
   },
 })
 
@@ -186,17 +199,31 @@ function CvView({ translate }: AppViewProps) {
       <h3 className="text-xl text-slate-100">{translate('cv.heading')}</h3>
       <p className="text-sm text-slate-300">{translate('cv.description')}</p>
 
-      <div className="rounded-xl border border-dashed border-slate-300/35 bg-slate-900/45 p-4">
-        <p className="text-sm text-slate-200">{translate('cv.placeholderNotice')}</p>
-        <p className="mt-2 text-xs uppercase tracking-[0.16em] text-slate-400">
-          {translate('cv.updatedLabel')}: {cvInfo.lastUpdated}
-        </p>
+      <div className="rounded-xl border border-slate-300/25 bg-slate-900/45 p-4">
+        <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.12em] text-slate-400">
+          <span>{translate('cv.previewTitle')}</span>
+          <span>
+            {translate('cv.updatedLabel')}: {cvInfo.lastUpdated}
+          </span>
+        </div>
+
+        <div className="h-[min(58vh,480px)] overflow-hidden rounded-lg border border-slate-300/20 bg-slate-950/80">
+          <iframe
+            title={translate('cv.previewTitle')}
+            src={cvInfo.fileUrl}
+            className="h-full w-full"
+            loading="lazy"
+          />
+        </div>
+
+        <p className="mt-3 text-xs text-slate-400">{translate('cv.previewFallback')}</p>
       </div>
 
       <a
-        href={cvInfo.placeholderUrl}
+        href={cvInfo.fileUrl}
         target="_blank"
         rel="noreferrer"
+        download
         className="inline-flex rounded-xl border border-emerald-300/40 bg-emerald-400/15 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/30"
       >
         {translate('cv.download')}
@@ -259,7 +286,7 @@ export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
   const [windowState, setWindowState] = useState<WindowStateMap>(createInitialWindowState)
-  const [activeMobileApp, setActiveMobileApp] = useState<DesktopAppId>('about')
+  const [mobileOpenApp, setMobileOpenApp] = useState<DesktopAppId | null>(null)
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
 
@@ -292,7 +319,21 @@ export function DesktopPortfolio() {
     }
   }, [])
 
-  const focusWindow = useCallback((appId: DesktopAppId, shouldOpen = false) => {
+  const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
+    const openApps = APP_DEFINITIONS
+      .map((app) => ({ id: app.id, state: windowState[app.id] }))
+      .filter((app) => app.state.mode === 'open')
+
+    if (openApps.length === 0) {
+      return null
+    }
+
+    return openApps.reduce((top, current) => {
+      return current.state.zIndex > top.state.zIndex ? current : top
+    }).id
+  }, [windowState])
+
+  const focusDesktopApp = useCallback((appId: DesktopAppId) => {
     zIndexRef.current += 1
     const nextZIndex = zIndexRef.current
 
@@ -300,38 +341,93 @@ export function DesktopPortfolio() {
       ...current,
       [appId]: {
         ...current[appId],
-        isOpen: shouldOpen ? true : current[appId].isOpen,
+        mode: 'open',
         zIndex: nextZIndex,
       },
     }))
   }, [])
 
-  const openApp = useCallback(
-    (appId: DesktopAppId) => {
-      focusWindow(appId, true)
-      setActiveMobileApp(appId)
-    },
-    [focusWindow],
-  )
+  const closeDesktopApp = useCallback((appId: DesktopAppId) => {
+    setWindowState((current) => {
+      const previous = current[appId]
+      const restoredPosition =
+        previous.isMaximized && previous.restorePosition ? previous.restorePosition : previous.position
 
-  const closeApp = useCallback((appId: DesktopAppId) => {
+      return {
+        ...current,
+        [appId]: {
+          ...previous,
+          mode: 'closed',
+          position: restoredPosition,
+          isMaximized: false,
+          restorePosition: null,
+        },
+      }
+    })
+  }, [])
+
+  const minimizeDesktopApp = useCallback((appId: DesktopAppId) => {
     setWindowState((current) => ({
       ...current,
       [appId]: {
         ...current[appId],
-        isOpen: false,
+        mode: 'minimized',
       },
     }))
   }, [])
 
-  const moveApp = useCallback((appId: DesktopAppId, position: WindowPosition) => {
-    setWindowState((current) => ({
-      ...current,
-      [appId]: {
-        ...current[appId],
-        position,
-      },
-    }))
+  const toggleDesktopMaximize = useCallback((appId: DesktopAppId) => {
+    zIndexRef.current += 1
+    const nextZIndex = zIndexRef.current
+
+    setWindowState((current) => {
+      const previous = current[appId]
+
+      if (previous.isMaximized) {
+        return {
+          ...current,
+          [appId]: {
+            ...previous,
+            mode: 'open',
+            zIndex: nextZIndex,
+            position: previous.restorePosition ?? previous.position,
+            isMaximized: false,
+            restorePosition: null,
+          },
+        }
+      }
+
+      return {
+        ...current,
+        [appId]: {
+          ...previous,
+          mode: 'open',
+          zIndex: nextZIndex,
+          isMaximized: true,
+          restorePosition: previous.position,
+        },
+      }
+    })
+  }, [])
+
+  const moveDesktopApp = useCallback((appId: DesktopAppId, position: WindowPosition) => {
+    setWindowState((current) => {
+      if (current[appId].isMaximized) {
+        return current
+      }
+
+      return {
+        ...current,
+        [appId]: {
+          ...current[appId],
+          position,
+        },
+      }
+    })
+  }, [])
+
+  const openMobileApp = useCallback((appId: DesktopAppId) => {
+    setMobileOpenApp(appId)
   }, [])
 
   const toggleLanguage = useCallback(() => {
@@ -345,114 +441,243 @@ export function DesktopPortfolio() {
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/80" />
 
       <div className="relative z-10 min-h-screen">
-        <header className="absolute inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/20 bg-slate-950/55 px-4 py-3 backdrop-blur-md md:px-6">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-sky-200/85">{profile.name}</p>
-            <p className="text-xs text-slate-300">{translate('desktop.environment')}</p>
-          </div>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-100 transition hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
-            >
-              {translate('desktop.language')}: {locale.toUpperCase()}
-            </button>
-
-            <span className="rounded-lg border border-slate-300/25 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-200">
-              {translate('desktop.clock')}: {clockLabel}
-            </span>
-          </div>
-        </header>
-
-        {!isMobile ? (
-          <div className="absolute left-4 top-24 hidden w-24 gap-3 md:grid">
-            {APP_DEFINITIONS.map((app) => (
-              <button
-                key={app.id}
-                type="button"
-                onClick={() => openApp(app.id)}
-                className="group flex flex-col items-center gap-1 rounded-xl border border-transparent bg-slate-900/25 p-2 text-center transition hover:border-slate-200/30 hover:bg-slate-900/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300"
-                aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
-              >
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/20 bg-slate-900/70 text-xs tracking-wider text-slate-100 group-hover:border-sky-300/60">
-                  {app.iconLabel}
-                </span>
-                <span className="line-clamp-2 text-xs text-slate-200">{translate(`apps.${app.id}.title`)}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
-
         {isMobile ? (
-          <section className="absolute inset-x-3 bottom-24 top-20 overflow-hidden rounded-2xl border border-slate-300/20 bg-slate-950/70 shadow-[0_24px_60px_rgba(2,6,23,0.65)] backdrop-blur-lg md:hidden">
-            <header className="border-b border-slate-200/15 px-4 py-3">
-              <h2 className="text-base text-slate-100">{translate(`apps.${activeMobileApp}.title`)}</h2>
-              <p className="mt-1 text-xs text-slate-400">{translate('desktop.mobileHint')}</p>
+          <>
+            <header className="absolute inset-x-0 top-0 z-50 flex justify-center px-4 pt-2">
+              <span className="rounded-full border border-slate-200/25 bg-slate-900/70 px-4 py-1 text-xs tracking-[0.2em] text-slate-100">
+                {clockLabel}
+              </span>
             </header>
-            <div className="h-[calc(100%-64px)] overflow-y-auto p-4">
-              <AppContent appId={activeMobileApp} locale={locale} translate={translate} />
-            </div>
-          </section>
-        ) : (
-          APP_DEFINITIONS.map((app) => {
-            const currentWindow = windowState[app.id]
 
-            if (!currentWindow.isOpen) {
-              return null
-            }
+            <section className="absolute inset-x-3 bottom-24 top-12 md:hidden">
+              {mobileOpenApp ? (
+                <article className="h-full overflow-hidden rounded-3xl border border-slate-300/25 bg-slate-950/80 shadow-[0_24px_60px_rgba(2,6,23,0.7)] backdrop-blur-lg">
+                  <header className="flex items-center justify-between border-b border-slate-200/20 bg-slate-900/90 px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setMobileOpenApp(null)}
+                      className="rounded-lg border border-slate-300/30 bg-slate-800/65 px-2 py-1 text-xs text-slate-100 transition hover:bg-slate-800/95"
+                    >
+                      {translate('mobile.back')}
+                    </button>
+                    <h2 className="text-sm tracking-wide text-slate-100">
+                      {translate(`apps.${mobileOpenApp}.title`)}
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={toggleLanguage}
+                      className="rounded-lg border border-slate-300/30 bg-slate-800/65 px-2 py-1 text-xs text-slate-100 transition hover:bg-slate-800/95"
+                    >
+                      {locale.toUpperCase()}
+                    </button>
+                  </header>
 
-            return (
-              <AppWindow
-                key={app.id}
-                title={translate(`apps.${app.id}.title`)}
-                closeLabel={translate('desktop.close')}
-                position={currentWindow.position}
-                zIndex={currentWindow.zIndex}
-                onFocus={() => focusWindow(app.id)}
-                onClose={() => closeApp(app.id)}
-                onMove={(position) => moveApp(app.id, position)}
-              >
-                <AppContent appId={app.id} locale={locale} translate={translate} />
-              </AppWindow>
-            )
-          })
-        )}
+                  <div className="h-[calc(100%-48px)] overflow-y-auto p-4">
+                    <AppContent appId={mobileOpenApp} locale={locale} translate={translate} />
+                  </div>
+                </article>
+              ) : (
+                <article className="h-full rounded-3xl border border-slate-300/20 bg-slate-950/72 p-4 shadow-[0_24px_60px_rgba(2,6,23,0.65)] backdrop-blur-lg">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.22em] text-sky-200/85">
+                        {translate('mobile.homeTitle')}
+                      </p>
+                      <h1 className="mt-1 text-lg text-slate-100">{profile.name}</h1>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={toggleLanguage}
+                      className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-100 transition hover:bg-slate-800/80"
+                    >
+                      {locale.toUpperCase()}
+                    </button>
+                  </div>
 
-        <nav className="absolute inset-x-0 bottom-3 z-50 px-3 md:px-4" aria-label={translate('panel.dock')}>
-          <div className="mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/60 p-2 shadow-[0_20px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
-            {APP_DEFINITIONS.map((app) => {
-              const active = isMobile ? activeMobileApp === app.id : windowState[app.id].isOpen
+                  <p className="mt-3 text-xs text-slate-300">{translate('mobile.homeSubtitle')}</p>
 
-              return (
+                  <div className="mt-6 grid grid-cols-3 gap-3">
+                    {APP_DEFINITIONS.map((app) => (
+                      <button
+                        key={app.id}
+                        type="button"
+                        onClick={() => openMobileApp(app.id)}
+                        aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                        className="flex flex-col items-center gap-2 rounded-2xl border border-slate-300/20 bg-slate-900/45 p-3 transition hover:border-sky-300/55 hover:bg-slate-900/75"
+                      >
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300/25 bg-slate-900/80 text-[11px] tracking-[0.18em] text-slate-100">
+                          {app.iconLabel}
+                        </span>
+                        <span className="text-[10px] uppercase tracking-wide text-slate-200">
+                          {translate(`apps.${app.id}.title`)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </article>
+              )}
+            </section>
+
+            <nav className="absolute inset-x-0 bottom-3 z-50 px-4" aria-label={translate('panel.dock')}>
+              <div className="mx-auto flex max-w-sm items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/68 p-2 shadow-[0_18px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
                 <button
-                  key={app.id}
                   type="button"
-                  onClick={() => {
-                    if (isMobile) {
-                      setActiveMobileApp(app.id)
-                      return
-                    }
-
-                    openApp(app.id)
-                  }}
-                  aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
-                  className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-3 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${
-                    active
+                  onClick={() => setMobileOpenApp(null)}
+                  aria-label={translate('mobile.home')}
+                  className={`rounded-xl px-3 py-2 text-[11px] tracking-[0.2em] transition ${
+                    mobileOpenApp === null
                       ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
-                      : 'border border-slate-300/20 bg-slate-900/45 text-slate-200 hover:border-slate-100/45 hover:bg-slate-900/75'
+                      : 'border border-slate-300/25 bg-slate-900/45 text-slate-200 hover:border-slate-100/45'
                   }`}
                 >
-                  <span className="text-[11px] tracking-[0.2em]">{app.iconLabel}</span>
-                  <span className="text-[10px] uppercase tracking-wide">
-                    {translate(`apps.${app.id}.title`)}
-                  </span>
+                  HM
                 </button>
+
+                {APP_DEFINITIONS.map((app) => {
+                  const isActive = mobileOpenApp === app.id
+
+                  return (
+                    <button
+                      key={app.id}
+                      type="button"
+                      onClick={() => openMobileApp(app.id)}
+                      aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                      className={`rounded-xl px-3 py-2 text-[11px] tracking-[0.2em] transition ${
+                        isActive
+                          ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
+                          : 'border border-slate-300/25 bg-slate-900/45 text-slate-200 hover:border-slate-100/45'
+                      }`}
+                    >
+                      {app.iconLabel}
+                    </button>
+                  )
+                })}
+              </div>
+            </nav>
+          </>
+        ) : (
+          <>
+            <header className="absolute inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/20 bg-slate-950/55 px-4 py-3 backdrop-blur-md md:px-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.3em] text-sky-200/85">{profile.name}</p>
+                <p className="text-xs text-slate-300">{translate('desktop.environment')}</p>
+              </div>
+
+              <div className="flex items-center gap-2 md:gap-3">
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-100 transition hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
+                >
+                  {translate('desktop.language')}: {locale.toUpperCase()}
+                </button>
+
+                <span className="rounded-lg border border-slate-300/25 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-200">
+                  {translate('desktop.clock')}: {clockLabel}
+                </span>
+              </div>
+            </header>
+
+            <div className="absolute left-4 top-24 hidden w-24 gap-3 md:grid">
+              {APP_DEFINITIONS.map((app) => {
+                const mode = windowState[app.id].mode
+                const highlighted = mode !== 'closed'
+
+                return (
+                  <button
+                    key={app.id}
+                    type="button"
+                    onClick={() => focusDesktopApp(app.id)}
+                    className={`group flex flex-col items-center gap-1 rounded-xl p-2 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 ${
+                      highlighted
+                        ? 'border border-sky-300/50 bg-slate-900/60'
+                        : 'border border-transparent bg-slate-900/25 hover:border-slate-200/30 hover:bg-slate-900/55'
+                    }`}
+                    aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                  >
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/20 bg-slate-900/70 text-xs tracking-wider text-slate-100 group-hover:border-sky-300/60">
+                      {app.iconLabel}
+                    </span>
+                    <span className="line-clamp-2 text-xs text-slate-200">
+                      {translate(`apps.${app.id}.title`)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {APP_DEFINITIONS.map((app) => {
+              const currentWindow = windowState[app.id]
+
+              if (currentWindow.mode === 'closed') {
+                return null
+              }
+
+              return (
+                <AppWindow
+                  key={app.id}
+                  title={translate(`apps.${app.id}.title`)}
+                  closeLabel={translate('desktop.close')}
+                  minimizeLabel={translate('desktop.minimize')}
+                  maximizeLabel={translate('desktop.maximize')}
+                  restoreLabel={translate('desktop.restore')}
+                  position={currentWindow.position}
+                  zIndex={currentWindow.zIndex}
+                  isVisible={currentWindow.mode === 'open'}
+                  isMaximized={currentWindow.isMaximized}
+                  onFocus={() => focusDesktopApp(app.id)}
+                  onClose={() => closeDesktopApp(app.id)}
+                  onMinimize={() => minimizeDesktopApp(app.id)}
+                  onToggleMaximize={() => toggleDesktopMaximize(app.id)}
+                  onMove={(position) => moveDesktopApp(app.id, position)}
+                >
+                  <AppContent appId={app.id} locale={locale} translate={translate} />
+                </AppWindow>
               )
             })}
-          </div>
-        </nav>
+
+            <nav className="absolute inset-x-0 bottom-3 z-50 px-3 md:px-4" aria-label={translate('panel.dock')}>
+              <div className="mx-auto flex w-full max-w-xl items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/60 p-2 shadow-[0_20px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
+                {APP_DEFINITIONS.map((app) => {
+                  const mode = windowState[app.id].mode
+                  const isActive = activeDesktopApp === app.id
+
+                  const dotClass = isActive
+                    ? 'bg-cyan-300'
+                    : mode === 'minimized'
+                      ? 'bg-amber-300'
+                      : mode === 'open'
+                        ? 'bg-slate-200'
+                        : 'border border-slate-500/70 bg-transparent'
+
+                  const buttonClass = isActive
+                    ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
+                    : mode === 'minimized'
+                      ? 'border border-amber-300/60 bg-amber-400/12 text-amber-100'
+                      : mode === 'open'
+                        ? 'border border-slate-100/45 bg-slate-900/75 text-slate-100'
+                        : 'border border-slate-300/20 bg-slate-900/45 text-slate-200 hover:border-slate-100/45 hover:bg-slate-900/75'
+
+                  return (
+                    <button
+                      key={app.id}
+                      type="button"
+                      onClick={() => focusDesktopApp(app.id)}
+                      aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
+                      className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-3 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${buttonClass}`}
+                    >
+                      <span className="text-[11px] tracking-[0.2em]">{app.iconLabel}</span>
+                      <span className="text-[10px] uppercase tracking-wide">
+                        {translate(`apps.${app.id}.title`)}
+                      </span>
+                      <span className={`mt-1 h-1.5 w-1.5 rounded-full ${dotClass}`} />
+                    </button>
+                  )
+                })}
+              </div>
+            </nav>
+          </>
+        )}
       </div>
     </div>
   )

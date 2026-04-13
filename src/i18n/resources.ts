@@ -6,11 +6,19 @@ export const resources = {
         language: 'Language',
         open: 'Open',
         close: 'Close',
+        minimize: 'Minimize',
+        maximize: 'Maximize',
+        restore: 'Restore',
         clock: 'Clock',
-        mobileHint: 'Mobile mode enabled: apps are shown in stack mode.',
       },
       panel: {
         dock: 'Dock',
+      },
+      mobile: {
+        home: 'Home',
+        back: 'Back',
+        homeTitle: 'Android-inspired home',
+        homeSubtitle: 'Tap an app to open it in full-screen card mode.',
       },
       apps: {
         projects: {
@@ -43,8 +51,9 @@ export const resources = {
       },
       cv: {
         heading: 'Curriculum Vitae',
-        description: 'A preview-first CV app with direct download action.',
-        placeholderNotice: 'This currently points to a placeholder PDF link.',
+        description: 'Preview the CV inline and download the same file.',
+        previewTitle: 'CV preview',
+        previewFallback: 'If your browser cannot render the preview, use the download button below.',
         updatedLabel: 'Updated',
         download: 'Download CV',
       },
@@ -61,11 +70,19 @@ export const resources = {
         language: 'Idioma',
         open: 'Abrir',
         close: 'Fechar',
+        minimize: 'Minimizar',
+        maximize: 'Maximizar',
+        restore: 'Restaurar',
         clock: 'Relogio',
-        mobileHint: 'Modo mobile ativo: apps exibidos em formato de pilha.',
       },
       panel: {
         dock: 'Dock',
+      },
+      mobile: {
+        home: 'Inicio',
+        back: 'Voltar',
+        homeTitle: 'Inicio inspirado no Android',
+        homeSubtitle: 'Toque em um app para abrir no modo de cartao em tela cheia.',
       },
       apps: {
         projects: {
@@ -98,8 +115,10 @@ export const resources = {
       },
       cv: {
         heading: 'Curriculum Vitae',
-        description: 'Aplicativo de CV com visualizacao previa e acao de download.',
-        placeholderNotice: 'No momento este link aponta para um PDF placeholder.',
+        description: 'Visualize o CV inline e baixe o mesmo arquivo.',
+        previewTitle: 'Previa do CV',
+        previewFallback:
+          'Se o seu navegador nao renderizar a previa, use o botao de download abaixo.',
         updatedLabel: 'Atualizado',
         download: 'Baixar CV',
       },

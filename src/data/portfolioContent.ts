@@ -139,7 +139,7 @@ export const skillGroups: SkillGroup[] = [
 ]
 
 export const cvInfo = {
-  placeholderUrl: 'https://example.com/your-cv.pdf',
+  fileUrl: '/cv.pdf',
   lastUpdated: '2026-04',
 }
 
