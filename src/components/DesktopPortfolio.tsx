@@ -1,4 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type UIEvent,
+} from 'react'
+import {
+  AddressBook,
+  FilePdf,
+  Folders,
+  Stack,
+  User,
+  type IconWeight,
+} from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 import {
   contacts,
@@ -17,7 +32,6 @@ type WindowMode = 'closed' | 'open' | 'minimized'
 
 interface DesktopAppDefinition {
   id: DesktopAppId
-  iconLabel: string
 }
 
 interface WindowState {
@@ -30,12 +44,14 @@ interface WindowState {
 
 type WindowStateMap = Record<DesktopAppId, WindowState>
 
+const ICON_WEIGHT: IconWeight = 'regular'
+
 const APP_DEFINITIONS: DesktopAppDefinition[] = [
-  { id: 'projects', iconLabel: 'PRJ' },
-  { id: 'about', iconLabel: 'ME' },
-  { id: 'contact', iconLabel: 'CNT' },
-  { id: 'cv', iconLabel: 'CV' },
-  { id: 'skills', iconLabel: 'SKL' },
+  { id: 'projects' },
+  { id: 'about' },
+  { id: 'skills' },
+  { id: 'contact' },
+  { id: 'cv' },
 ]
 
 const INITIAL_WINDOW_POSITIONS: Record<DesktopAppId, WindowPosition> = {
@@ -93,6 +109,34 @@ const resolveLocale = (language: string): LocaleCode =>
 
 const formatClock = (date: Date): string =>
   new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date)
+
+const findMobileTabIndex = (appId: DesktopAppId): number =>
+  APP_DEFINITIONS.findIndex((app) => app.id === appId)
+
+function AppIcon({
+  appId,
+  size,
+  className,
+}: {
+  appId: DesktopAppId
+  size: number
+  className?: string
+}) {
+  const sharedProps = { size, weight: ICON_WEIGHT, className, 'aria-hidden': true as const }
+
+  switch (appId) {
+    case 'projects':
+      return <Folders {...sharedProps} />
+    case 'about':
+      return <User {...sharedProps} />
+    case 'skills':
+      return <Stack {...sharedProps} />
+    case 'contact':
+      return <AddressBook {...sharedProps} />
+    case 'cv':
+      return <FilePdf {...sharedProps} />
+  }
+}
 
 interface AppViewProps {
   locale: LocaleCode
@@ -195,39 +239,27 @@ function ContactView({ translate }: AppViewProps) {
 
 function CvView({ translate }: AppViewProps) {
   return (
-    <section className="space-y-4">
-      <h3 className="text-xl text-slate-100">{translate('cv.heading')}</h3>
-      <p className="text-sm text-slate-300">{translate('cv.description')}</p>
-
-      <div className="rounded-xl border border-slate-300/25 bg-slate-900/45 p-4">
-        <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.12em] text-slate-400">
-          <span>{translate('cv.previewTitle')}</span>
-          <span>
-            {translate('cv.updatedLabel')}: {cvInfo.lastUpdated}
-          </span>
-        </div>
-
-        <div className="h-[min(58vh,480px)] overflow-hidden rounded-lg border border-slate-300/20 bg-slate-950/80">
-          <iframe
-            title={translate('cv.previewTitle')}
-            src={cvInfo.fileUrl}
-            className="h-full w-full"
-            loading="lazy"
-          />
-        </div>
-
-        <p className="mt-3 text-xs text-slate-400">{translate('cv.previewFallback')}</p>
+    <section className="flex h-full min-h-[24rem] flex-col gap-3">
+      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-300/25 bg-slate-950/85">
+        <iframe
+          title={translate('cv.previewTitle')}
+          src={cvInfo.fileUrl}
+          className="h-full w-full"
+          loading="lazy"
+        />
       </div>
 
-      <a
-        href={cvInfo.fileUrl}
-        target="_blank"
-        rel="noreferrer"
-        download
-        className="inline-flex rounded-xl border border-emerald-300/40 bg-emerald-400/15 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/30"
-      >
-        {translate('cv.download')}
-      </a>
+      <footer className="rounded-xl border border-slate-300/25 bg-slate-900/55 p-2">
+        <a
+          href={cvInfo.fileUrl}
+          target="_blank"
+          rel="noreferrer"
+          download
+          className="inline-flex w-full justify-center rounded-lg border border-emerald-300/45 bg-emerald-400/20 px-4 py-2 text-sm text-emerald-100 transition hover:bg-emerald-400/30"
+        >
+          {translate('cv.download')}
+        </a>
+      </footer>
     </section>
   )
 }
@@ -282,15 +314,53 @@ function AppContent({
   }
 }
 
+function MobileTabPage({
+  appId,
+  locale,
+  translate,
+  onToggleLanguage,
+}: {
+  appId: DesktopAppId
+  locale: LocaleCode
+  translate: (key: string) => string
+  onToggleLanguage: () => void
+}) {
+  return (
+    <section className="h-full w-full flex-none snap-start px-3 pb-1">
+      <article className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-300/20 bg-slate-950/78 shadow-[0_18px_52px_rgba(2,6,23,0.65)] backdrop-blur-lg">
+        <header className="flex items-center justify-between border-b border-slate-200/20 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <AppIcon appId={appId} size={18} className="text-sky-200" />
+            <h2 className="text-sm tracking-wide text-slate-100">{translate(`apps.${appId}.title`)}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onToggleLanguage}
+            className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1 text-xs text-slate-100 transition hover:bg-slate-800/85"
+          >
+            {locale.toUpperCase()}
+          </button>
+        </header>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <AppContent appId={appId} locale={locale} translate={translate} />
+        </div>
+      </article>
+    </section>
+  )
+}
+
 export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
   const [windowState, setWindowState] = useState<WindowStateMap>(createInitialWindowState)
-  const [mobileOpenApp, setMobileOpenApp] = useState<DesktopAppId | null>(null)
+  const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
 
   const zIndexRef = useRef(80)
+  const mobilePagesRef = useRef<HTMLDivElement>(null)
+
   const locale = resolveLocale(i18n.language)
 
   const translate = useCallback((key: string): string => t(key) as string, [t])
@@ -318,6 +388,23 @@ export function DesktopPortfolio() {
       window.clearInterval(intervalId)
     }
   }, [])
+
+  useEffect(() => {
+    if (!isMobile) {
+      return
+    }
+
+    const container = mobilePagesRef.current
+    if (!container) {
+      return
+    }
+
+    const activeIndex = findMobileTabIndex(activeMobileTab)
+    container.scrollTo({
+      left: activeIndex * container.clientWidth,
+      behavior: 'auto',
+    })
+  }, [activeMobileTab, isMobile])
 
   const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
     const openApps = APP_DEFINITIONS
@@ -426,14 +513,55 @@ export function DesktopPortfolio() {
     })
   }, [])
 
-  const openMobileApp = useCallback((appId: DesktopAppId) => {
-    setMobileOpenApp(appId)
-  }, [])
+  const handleTrayClick = useCallback(
+    (appId: DesktopAppId) => {
+      const mode = windowState[appId].mode
+
+      if (mode === 'open') {
+        minimizeDesktopApp(appId)
+        return
+      }
+
+      focusDesktopApp(appId)
+    },
+    [focusDesktopApp, minimizeDesktopApp, windowState],
+  )
 
   const toggleLanguage = useCallback(() => {
     const nextLanguage = locale === 'en' ? 'pt' : 'en'
     void i18n.changeLanguage(nextLanguage)
   }, [i18n, locale])
+
+  const scrollMobileToTab = useCallback((appId: DesktopAppId, behavior: ScrollBehavior = 'smooth') => {
+    const container = mobilePagesRef.current
+    if (!container) {
+      return
+    }
+
+    const targetIndex = findMobileTabIndex(appId)
+    container.scrollTo({
+      left: targetIndex * container.clientWidth,
+      behavior,
+    })
+  }, [])
+
+  const handleMobileTabSelect = useCallback(
+    (appId: DesktopAppId) => {
+      setActiveMobileTab(appId)
+      scrollMobileToTab(appId, 'smooth')
+    },
+    [scrollMobileToTab],
+  )
+
+  const handleMobileScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
+    const container = event.currentTarget
+    const nextIndex = Math.round(container.scrollLeft / container.clientWidth)
+    const nextTab = APP_DEFINITIONS[nextIndex]?.id
+
+    if (nextTab) {
+      setActiveMobileTab(nextTab)
+    }
+  }, [])
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">
@@ -449,106 +577,42 @@ export function DesktopPortfolio() {
               </span>
             </header>
 
-            <section className="absolute inset-x-3 bottom-24 top-12 md:hidden">
-              {mobileOpenApp ? (
-                <article className="h-full overflow-hidden rounded-3xl border border-slate-300/25 bg-slate-950/80 shadow-[0_24px_60px_rgba(2,6,23,0.7)] backdrop-blur-lg">
-                  <header className="flex items-center justify-between border-b border-slate-200/20 bg-slate-900/90 px-3 py-2">
-                    <button
-                      type="button"
-                      onClick={() => setMobileOpenApp(null)}
-                      className="rounded-lg border border-slate-300/30 bg-slate-800/65 px-2 py-1 text-xs text-slate-100 transition hover:bg-slate-800/95"
-                    >
-                      {translate('mobile.back')}
-                    </button>
-                    <h2 className="text-sm tracking-wide text-slate-100">
-                      {translate(`apps.${mobileOpenApp}.title`)}
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={toggleLanguage}
-                      className="rounded-lg border border-slate-300/30 bg-slate-800/65 px-2 py-1 text-xs text-slate-100 transition hover:bg-slate-800/95"
-                    >
-                      {locale.toUpperCase()}
-                    </button>
-                  </header>
-
-                  <div className="h-[calc(100%-48px)] overflow-y-auto p-4">
-                    <AppContent appId={mobileOpenApp} locale={locale} translate={translate} />
-                  </div>
-                </article>
-              ) : (
-                <article className="h-full rounded-3xl border border-slate-300/20 bg-slate-950/72 p-4 shadow-[0_24px_60px_rgba(2,6,23,0.65)] backdrop-blur-lg">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.22em] text-sky-200/85">
-                        {translate('mobile.homeTitle')}
-                      </p>
-                      <h1 className="mt-1 text-lg text-slate-100">{profile.name}</h1>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={toggleLanguage}
-                      className="rounded-lg border border-slate-300/30 bg-slate-900/65 px-3 py-1.5 text-xs text-slate-100 transition hover:bg-slate-800/80"
-                    >
-                      {locale.toUpperCase()}
-                    </button>
-                  </div>
-
-                  <p className="mt-3 text-xs text-slate-300">{translate('mobile.homeSubtitle')}</p>
-
-                  <div className="mt-6 grid grid-cols-3 gap-3">
-                    {APP_DEFINITIONS.map((app) => (
-                      <button
-                        key={app.id}
-                        type="button"
-                        onClick={() => openMobileApp(app.id)}
-                        aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
-                        className="flex flex-col items-center gap-2 rounded-2xl border border-slate-300/20 bg-slate-900/45 p-3 transition hover:border-sky-300/55 hover:bg-slate-900/75"
-                      >
-                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300/25 bg-slate-900/80 text-[11px] tracking-[0.18em] text-slate-100">
-                          {app.iconLabel}
-                        </span>
-                        <span className="text-[10px] uppercase tracking-wide text-slate-200">
-                          {translate(`apps.${app.id}.title`)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </article>
-              )}
+            <section className="absolute inset-x-0 bottom-24 top-12 md:hidden">
+              <div
+                ref={mobilePagesRef}
+                onScroll={handleMobileScroll}
+                className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {APP_DEFINITIONS.map((app) => (
+                  <MobileTabPage
+                    key={app.id}
+                    appId={app.id}
+                    locale={locale}
+                    translate={translate}
+                    onToggleLanguage={toggleLanguage}
+                  />
+                ))}
+              </div>
             </section>
 
             <nav className="absolute inset-x-0 bottom-3 z-50 px-4" aria-label={translate('panel.dock')}>
               <div className="mx-auto flex max-w-sm items-center justify-center gap-2 rounded-2xl border border-slate-200/25 bg-slate-950/68 p-2 shadow-[0_18px_50px_rgba(2,6,23,0.65)] backdrop-blur-xl">
-                <button
-                  type="button"
-                  onClick={() => setMobileOpenApp(null)}
-                  aria-label={translate('mobile.home')}
-                  className={`rounded-xl px-3 py-2 text-[11px] tracking-[0.2em] transition ${
-                    mobileOpenApp === null
-                      ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
-                      : 'border border-slate-300/25 bg-slate-900/45 text-slate-200 hover:border-slate-100/45'
-                  }`}
-                >
-                  HM
-                </button>
-
                 {APP_DEFINITIONS.map((app) => {
-                  const isActive = mobileOpenApp === app.id
+                  const isActive = activeMobileTab === app.id
 
                   return (
                     <button
                       key={app.id}
                       type="button"
-                      onClick={() => openMobileApp(app.id)}
-                      aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
-                      className={`rounded-xl px-3 py-2 text-[11px] tracking-[0.2em] transition ${
+                      onClick={() => handleMobileTabSelect(app.id)}
+                      aria-label={translate(`apps.${app.id}.title`)}
+                      className={`rounded-xl p-2 transition ${
                         isActive
                           ? 'border border-sky-300/70 bg-sky-400/20 text-sky-50'
                           : 'border border-slate-300/25 bg-slate-900/45 text-slate-200 hover:border-slate-100/45'
                       }`}
                     >
-                      {app.iconLabel}
+                      <AppIcon appId={app.id} size={20} className="text-current" />
                     </button>
                   )
                 })}
@@ -595,8 +659,8 @@ export function DesktopPortfolio() {
                     }`}
                     aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
                   >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/20 bg-slate-900/70 text-xs tracking-wider text-slate-100 group-hover:border-sky-300/60">
-                      {app.iconLabel}
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200/20 bg-slate-900/70 text-slate-100 group-hover:border-sky-300/60">
+                      <AppIcon appId={app.id} size={22} />
                     </span>
                     <span className="line-clamp-2 text-xs text-slate-200">
                       {translate(`apps.${app.id}.title`)}
@@ -662,14 +726,11 @@ export function DesktopPortfolio() {
                     <button
                       key={app.id}
                       type="button"
-                      onClick={() => focusDesktopApp(app.id)}
+                      onClick={() => handleTrayClick(app.id)}
                       aria-label={`${translate('desktop.open')} ${translate(`apps.${app.id}.title`)}`}
                       className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-3 py-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 ${buttonClass}`}
                     >
-                      <span className="text-[11px] tracking-[0.2em]">{app.iconLabel}</span>
-                      <span className="text-[10px] uppercase tracking-wide">
-                        {translate(`apps.${app.id}.title`)}
-                      </span>
+                      <AppIcon appId={app.id} size={18} className="text-current" />
                       <span className={`mt-1 h-1.5 w-1.5 rounded-full ${dotClass}`} />
                     </button>
                   )

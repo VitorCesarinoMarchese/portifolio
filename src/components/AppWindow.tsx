@@ -1,4 +1,5 @@
 import { useCallback, useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
+import { CornersIn, CornersOut, Minus, X } from '@phosphor-icons/react'
 
 export interface WindowPosition {
   x: number
@@ -131,7 +132,7 @@ export function AppWindow({
             onClick={onMinimize}
             className="rounded-md border border-amber-300/45 bg-amber-500/20 px-2 py-1 text-xs text-amber-100 transition hover:bg-amber-500/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-200"
           >
-            _
+            <Minus size={14} weight="regular" aria-hidden />
           </button>
           <button
             type="button"
@@ -140,7 +141,11 @@ export function AppWindow({
             onClick={onToggleMaximize}
             className="rounded-md border border-emerald-300/45 bg-emerald-500/20 px-2 py-1 text-xs text-emerald-100 transition hover:bg-emerald-500/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-200"
           >
-            {isMaximized ? 'R' : '[]'}
+            {isMaximized ? (
+              <CornersIn size={14} weight="regular" aria-hidden />
+            ) : (
+              <CornersOut size={14} weight="regular" aria-hidden />
+            )}
           </button>
           <button
             type="button"
@@ -149,7 +154,7 @@ export function AppWindow({
             onClick={onClose}
             className="rounded-md border border-rose-300/40 bg-rose-500/20 px-2 py-1 text-xs text-rose-100 transition hover:bg-rose-500/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-200"
           >
-            X
+            <X size={14} weight="regular" aria-hidden />
           </button>
         </div>
       </header>
