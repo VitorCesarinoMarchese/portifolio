@@ -31,7 +31,7 @@ function PineForest() {
         const jitter = pseudoRandom(index + 0.33)
 
         const x = (column - 3) * 2.65 + (lane % 2 === 0 ? 0.52 : -0.52) + (jitter - 0.5) * 0.45
-        const y = -1.75 - lane * 0.22
+        const y = -2.78
         const z = -2.1 - lane * 1.55
 
         const canopyScale = 0.85 + pseudoRandom(index + 1.15) * 0.9
@@ -44,7 +44,7 @@ function PineForest() {
           canopyHeight,
           canopyRadius: canopyScale,
           rotationY: pseudoRandom(index + 4.02) * Math.PI,
-          hue: 130 + pseudoRandom(index + 4.73) * 18,
+          hue: 120 + pseudoRandom(index + 4.73) * 12,
           accentHue: 205 + pseudoRandom(index + 5.31) * 70,
           swaySpeed: 0.16 + pseudoRandom(index + 6.04) * 0.12,
           swayAmount: 0.02 + pseudoRandom(index + 6.88) * 0.018,
@@ -64,7 +64,7 @@ function PineForest() {
       const config = trees[index]
       const swayBase = elapsed * config.swaySpeed + index * 0.41
 
-      tree.position.y = config.position[1] + Math.sin(swayBase) * 0.03
+      tree.position.y = config.position[1]
       tree.rotation.z = Math.sin(swayBase) * config.swayAmount
       tree.rotation.y = config.rotationY + Math.sin(elapsed * 0.07 + index) * 0.012
     })
@@ -94,7 +94,7 @@ function PineForest() {
           <mesh position={[0, config.trunkHeight + config.canopyHeight * 0.45, 0]}>
             <coneGeometry args={[config.canopyRadius, config.canopyHeight, 6]} />
             <meshStandardMaterial
-              color={`hsl(${config.hue} 40% 30%)`}
+              color={`hsl(${config.hue} 48% 31%)`}
               emissive={`hsl(${config.accentHue} 55% 13%)`}
               emissiveIntensity={0.22}
               flatShading
@@ -106,7 +106,7 @@ function PineForest() {
           <mesh position={[0, config.trunkHeight + config.canopyHeight * 0.78, 0]}>
             <coneGeometry args={[config.canopyRadius * 0.72, config.canopyHeight * 0.72, 6]} />
             <meshStandardMaterial
-              color={`hsl(${config.hue} 36% 36%)`}
+              color={`hsl(${config.hue} 44% 38%)`}
               emissive={`hsl(${config.accentHue + 12} 65% 10%)`}
               emissiveIntensity={0.18}
               flatShading
@@ -131,7 +131,7 @@ function DriftingMoon() {
 
     const drift = state.clock.elapsedTime
     moon.position.x = 7.4 + Math.sin(drift * 0.055) * 0.46
-    moon.position.y = 5.05 + Math.cos(drift * 0.048) * 0.34
+    moon.position.y = 4.05 + Math.cos(drift * 0.048) * 0.34
     moon.rotation.y += 0.0009
   })
 
