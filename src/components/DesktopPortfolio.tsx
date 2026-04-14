@@ -42,6 +42,12 @@ interface WindowState {
   restorePosition: WindowPosition | null
 }
 
+interface MobileTapTransition {
+  targetIndex: number
+  direction: -1 | 1
+  lastIndex: number
+}
+
 type WindowStateMap = Record<DesktopAppId, WindowState>
 
 const ICON_WEIGHT: IconWeight = 'regular'
@@ -112,6 +118,19 @@ const formatClock = (date: Date): string =>
 
 const findMobileTabIndex = (appId: DesktopAppId): number =>
   APP_DEFINITIONS.findIndex((app) => app.id === appId)
+
+const getMobilePageOffsets = (
+  container: HTMLDivElement,
+  pageRefs: Array<HTMLDivElement | null>,
+): number[] =>
+  APP_DEFINITIONS.map((_, index) => pageRefs[index]?.offsetLeft ?? index * container.clientWidth)
+
+const getClosestOffsetIndex = (scrollLeft: number, offsets: number[]): number =>
+  offsets.reduce((bestIndex, offset, index) => {
+    const bestDistance = Math.abs(scrollLeft - offsets[bestIndex])
+    const currentDistance = Math.abs(scrollLeft - offset)
+    return currentDistance < bestDistance ? index : bestIndex
+  }, 0)
 
 function AppIcon({
   appId,
@@ -404,6 +423,7 @@ export function DesktopPortfolio() {
   const mobilePagesRef = useRef<HTMLDivElement>(null)
   const mobilePageRefs = useRef<Array<HTMLDivElement | null>>([])
   const mobileEntrySyncRef = useRef(false)
+  const mobileTapTransitionRef = useRef<MobileTapTransition | null>(null)
 
   const locale = resolveLocale(i18n.language)
 
@@ -565,49 +585,79 @@ export function DesktopPortfolio() {
       return
     }
 
+    const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
     const targetIndex = findMobileTabIndex(appId)
-    const targetPage = mobilePageRefs.current[targetIndex]
-    if (!targetPage) {
-      return
-    }
 
     container.scrollTo({
-      left: targetPage.offsetLeft,
+      left: offsets[targetIndex] ?? targetIndex * container.clientWidth,
       behavior,
     })
   }, [])
 
   const handleMobileTabSelect = useCallback(
     (appId: DesktopAppId) => {
-      if (appId === activeMobileTab) {
+      const container = mobilePagesRef.current
+      if (!container) {
         return
       }
 
-      setActiveMobileTab(appId)
-      scrollMobileToTab(appId, 'smooth')
+      const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
+      const sourceIndex = getClosestOffsetIndex(container.scrollLeft, offsets)
+      const targetIndex = findMobileTabIndex(appId)
+      const sourceTab = APP_DEFINITIONS[sourceIndex]?.id
+
+      if (sourceTab) {
+        setActiveMobileTab((current) => (current === sourceTab ? current : sourceTab))
+      }
+
+      if (targetIndex === sourceIndex) {
+        mobileTapTransitionRef.current = null
+        return
+      }
+
+      mobileTapTransitionRef.current = {
+        targetIndex,
+        direction: targetIndex > sourceIndex ? 1 : -1,
+        lastIndex: sourceIndex,
+      }
+
+      container.scrollTo({
+        left: offsets[targetIndex] ?? targetIndex * container.clientWidth,
+        behavior: 'smooth',
+      })
     },
-    [activeMobileTab, scrollMobileToTab],
+    [],
   )
 
   const handleMobileScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     const container = event.currentTarget
-    const offsets = APP_DEFINITIONS.map((_, index) => {
-      const node = mobilePageRefs.current[index]
-      return node?.offsetLeft ?? index * container.clientWidth
-    })
+    const offsets = getMobilePageOffsets(container, mobilePageRefs.current)
+    const rawIndex = getClosestOffsetIndex(container.scrollLeft, offsets)
+    let nextIndex = rawIndex
 
-    const nextIndex = offsets.reduce((bestIndex, offset, index) => {
-      const bestDistance = Math.abs(container.scrollLeft - offsets[bestIndex])
-      const currentDistance = Math.abs(container.scrollLeft - offset)
-      return currentDistance < bestDistance ? index : bestIndex
-    }, 0)
+    const tapTransition = mobileTapTransitionRef.current
+    if (tapTransition) {
+      if (tapTransition.direction === 1) {
+        nextIndex = Math.max(tapTransition.lastIndex, Math.min(rawIndex, tapTransition.targetIndex))
+      } else {
+        nextIndex = Math.min(tapTransition.lastIndex, Math.max(rawIndex, tapTransition.targetIndex))
+      }
+
+      tapTransition.lastIndex = nextIndex
+
+      const targetOffset = offsets[tapTransition.targetIndex]
+      const reachedTarget = Math.abs(container.scrollLeft - targetOffset) < 1.5
+      if (reachedTarget && nextIndex === tapTransition.targetIndex) {
+        mobileTapTransitionRef.current = null
+      }
+    }
 
     const nextTab = APP_DEFINITIONS[nextIndex]?.id
 
-    if (nextTab && nextTab !== activeMobileTab) {
-      setActiveMobileTab(nextTab)
+    if (nextTab) {
+      setActiveMobileTab((current) => (current === nextTab ? current : nextTab))
     }
-  }, [activeMobileTab])
+  }, [])
 
   useEffect(() => {
     if (!isMobile) {
