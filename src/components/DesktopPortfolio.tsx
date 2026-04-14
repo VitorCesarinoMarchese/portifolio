@@ -17,7 +17,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import {
   contacts,
-  cvInfo,
+  getCvFileUrl,
   getLocalizedText,
   profile,
   projects,
@@ -237,13 +237,53 @@ function ContactView({ translate }: AppViewProps) {
   )
 }
 
-function CvView({ translate }: AppViewProps) {
+function CvView({ locale, translate }: AppViewProps) {
+  const [cvFileUrl, setCvFileUrl] = useState(() => getCvFileUrl(locale))
+
+  useEffect(() => {
+    let isActive = true
+    const preferredCvUrl = getCvFileUrl(locale)
+    const fallbackCvUrl = getCvFileUrl('en')
+    const controller = new AbortController()
+
+    const verifyLocalizedCv = async () => {
+      if (preferredCvUrl === fallbackCvUrl) {
+        if (isActive) {
+          setCvFileUrl(fallbackCvUrl)
+        }
+        return
+      }
+
+      try {
+        const response = await fetch(preferredCvUrl, {
+          method: 'HEAD',
+          signal: controller.signal,
+        })
+
+        if (isActive) {
+          setCvFileUrl(response.ok ? preferredCvUrl : fallbackCvUrl)
+        }
+      } catch {
+        if (isActive) {
+          setCvFileUrl(fallbackCvUrl)
+        }
+      }
+    }
+
+    void verifyLocalizedCv()
+
+    return () => {
+      isActive = false
+      controller.abort()
+    }
+  }, [locale])
+
   return (
     <section className="flex h-full min-h-[24rem] flex-col gap-3">
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-300/25 bg-slate-950/85">
         <iframe
           title={translate('cv.previewTitle')}
-          src={cvInfo.fileUrl}
+          src={cvFileUrl}
           className="h-full w-full"
           loading="lazy"
         />
@@ -251,7 +291,7 @@ function CvView({ translate }: AppViewProps) {
 
       <footer className="rounded-xl border border-slate-300/25 bg-slate-900/55 p-2">
         <a
-          href={cvInfo.fileUrl}
+          href={cvFileUrl}
           target="_blank"
           rel="noreferrer"
           download
@@ -319,15 +359,17 @@ function MobileTabPage({
   locale,
   translate,
   onToggleLanguage,
+  pageRef,
 }: {
   appId: DesktopAppId
   locale: LocaleCode
   translate: (key: string) => string
   onToggleLanguage: () => void
+  pageRef: (node: HTMLDivElement | null) => void
 }) {
   return (
-    <section className="h-full w-full flex-none snap-start px-3 pb-1">
-      <article className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-300/20 bg-slate-950/78 shadow-[0_18px_52px_rgba(2,6,23,0.65)] backdrop-blur-lg">
+    <div ref={pageRef} className="h-full w-full flex-none snap-start">
+      <article className="mx-3 mb-1 flex h-full min-h-0 flex-col overflow-hidden rounded-3xl border border-slate-300/20 bg-slate-950/78 shadow-[0_18px_52px_rgba(2,6,23,0.65)] backdrop-blur-lg">
         <header className="flex items-center justify-between border-b border-slate-200/20 px-4 py-3">
           <div className="flex items-center gap-2">
             <AppIcon appId={appId} size={18} className="text-sky-200" />
@@ -346,7 +388,7 @@ function MobileTabPage({
           <AppContent appId={appId} locale={locale} translate={translate} />
         </div>
       </article>
-    </section>
+    </div>
   )
 }
 
@@ -360,6 +402,8 @@ export function DesktopPortfolio() {
 
   const zIndexRef = useRef(80)
   const mobilePagesRef = useRef<HTMLDivElement>(null)
+  const mobilePageRefs = useRef<Array<HTMLDivElement | null>>([])
+  const mobileEntrySyncRef = useRef(false)
 
   const locale = resolveLocale(i18n.language)
 
@@ -388,23 +432,6 @@ export function DesktopPortfolio() {
       window.clearInterval(intervalId)
     }
   }, [])
-
-  useEffect(() => {
-    if (!isMobile) {
-      return
-    }
-
-    const container = mobilePagesRef.current
-    if (!container) {
-      return
-    }
-
-    const activeIndex = findMobileTabIndex(activeMobileTab)
-    container.scrollTo({
-      left: activeIndex * container.clientWidth,
-      behavior: 'auto',
-    })
-  }, [activeMobileTab, isMobile])
 
   const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
     const openApps = APP_DEFINITIONS
@@ -539,29 +566,62 @@ export function DesktopPortfolio() {
     }
 
     const targetIndex = findMobileTabIndex(appId)
+    const targetPage = mobilePageRefs.current[targetIndex]
+    if (!targetPage) {
+      return
+    }
+
     container.scrollTo({
-      left: targetIndex * container.clientWidth,
+      left: targetPage.offsetLeft,
       behavior,
     })
   }, [])
 
   const handleMobileTabSelect = useCallback(
     (appId: DesktopAppId) => {
+      if (appId === activeMobileTab) {
+        return
+      }
+
       setActiveMobileTab(appId)
       scrollMobileToTab(appId, 'smooth')
     },
-    [scrollMobileToTab],
+    [activeMobileTab, scrollMobileToTab],
   )
 
   const handleMobileScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
     const container = event.currentTarget
-    const nextIndex = Math.round(container.scrollLeft / container.clientWidth)
+    const offsets = APP_DEFINITIONS.map((_, index) => {
+      const node = mobilePageRefs.current[index]
+      return node?.offsetLeft ?? index * container.clientWidth
+    })
+
+    const nextIndex = offsets.reduce((bestIndex, offset, index) => {
+      const bestDistance = Math.abs(container.scrollLeft - offsets[bestIndex])
+      const currentDistance = Math.abs(container.scrollLeft - offset)
+      return currentDistance < bestDistance ? index : bestIndex
+    }, 0)
+
     const nextTab = APP_DEFINITIONS[nextIndex]?.id
 
-    if (nextTab) {
+    if (nextTab && nextTab !== activeMobileTab) {
       setActiveMobileTab(nextTab)
     }
-  }, [])
+  }, [activeMobileTab])
+
+  useEffect(() => {
+    if (!isMobile) {
+      mobileEntrySyncRef.current = false
+      return
+    }
+
+    if (mobileEntrySyncRef.current) {
+      return
+    }
+
+    scrollMobileToTab(activeMobileTab, 'auto')
+    mobileEntrySyncRef.current = true
+  }, [activeMobileTab, isMobile, scrollMobileToTab])
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">
@@ -583,13 +643,16 @@ export function DesktopPortfolio() {
                 onScroll={handleMobileScroll}
                 className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
-                {APP_DEFINITIONS.map((app) => (
+                {APP_DEFINITIONS.map((app, index) => (
                   <MobileTabPage
                     key={app.id}
                     appId={app.id}
                     locale={locale}
                     translate={translate}
                     onToggleLanguage={toggleLanguage}
+                    pageRef={(node) => {
+                      mobilePageRefs.current[index] = node
+                    }}
                   />
                 ))}
               </div>
