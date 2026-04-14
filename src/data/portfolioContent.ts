@@ -139,8 +139,13 @@ export const skillGroups: SkillGroup[] = [
 ]
 
 export const cvInfo = {
-  fileUrl: '/cv.pdf',
+  files: {
+    en: '/cv-en.pdf',
+    pt: '/cv-pt.pdf',
+  } satisfies Record<LocaleCode, string>,
   lastUpdated: '2026-04',
 }
+
+export const getCvFileUrl = (locale: LocaleCode): string => cvInfo.files[locale] ?? cvInfo.files.en
 
 export const getLocalizedText = (value: LocalizedText, locale: LocaleCode): string => value[locale]
