@@ -1,43 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Component, type ReactNode, useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import type { Group, Mesh } from 'three'
-
-interface PlasmaWallpaperProps {
-  onReady?: () => void
-  onError?: () => void
-}
-
-interface WallpaperCanvasErrorBoundaryProps {
-  onError?: () => void
-  children: ReactNode
-}
-
-interface WallpaperCanvasErrorBoundaryState {
-  hasError: boolean
-}
-
-class WallpaperCanvasErrorBoundary extends Component<
-  WallpaperCanvasErrorBoundaryProps,
-  WallpaperCanvasErrorBoundaryState
-> {
-  state: WallpaperCanvasErrorBoundaryState = { hasError: false }
-
-  static getDerivedStateFromError(): WallpaperCanvasErrorBoundaryState {
-    return { hasError: true }
-  }
-
-  override componentDidCatch() {
-    this.props.onError?.()
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return null
-    }
-
-    return this.props.children
-  }
-}
 
 interface TreeConfig {
   position: [number, number, number]
@@ -55,30 +18,6 @@ interface TreeConfig {
 const pseudoRandom = (seed: number): number => {
   const value = Math.sin(seed * 12.9898) * 43758.5453
   return value - Math.floor(value)
-}
-
-const isWebglAvailable = (): boolean => {
-  if (typeof document === 'undefined') {
-    return true
-  }
-
-  const canvas = document.createElement('canvas')
-  return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
-}
-
-function SceneReadySignal({ onReady }: { onReady?: () => void }) {
-  const didNotifyRef = useRef(false)
-
-  useFrame(() => {
-    if (didNotifyRef.current) {
-      return
-    }
-
-    didNotifyRef.current = true
-    onReady?.()
-  })
-
-  return null
 }
 
 function PineForest() {
@@ -211,35 +150,20 @@ function DriftingMoon() {
   )
 }
 
-export function PlasmaWallpaper({ onReady, onError }: PlasmaWallpaperProps) {
-  const webglSupported = useMemo(() => isWebglAvailable(), [])
-
-  useEffect(() => {
-    if (!webglSupported) {
-      onError?.()
-    }
-  }, [onError, webglSupported])
-
-  if (!webglSupported) {
-    return null
-  }
-
+export function PlasmaWallpaper() {
   return (
     <div className="pointer-events-none absolute inset-0">
-      <WallpaperCanvasErrorBoundary onError={onError}>
-        <Canvas camera={{ position: [0, 2.2, 8], fov: 54 }} dpr={[1, 1.5]}>
-          <color attach="background" args={['#020617']} />
-          <fog attach="fog" args={['#020617', 8, 34]} />
-          <ambientLight intensity={0.24} />
-          <hemisphereLight color="#9dd8ff" groundColor="#111827" intensity={0.58} />
-          <directionalLight position={[4, 8, 7]} color="#a78bfa" intensity={1.08} />
-          <pointLight position={[-7, 2, -2]} color="#22d3ee" intensity={1.52} />
-          <pointLight position={[5.5, 4.8, -10]} color="#60a5fa" intensity={0.86} />
-          <PineForest />
-          <DriftingMoon />
-          <SceneReadySignal onReady={onReady} />
-        </Canvas>
-      </WallpaperCanvasErrorBoundary>
+      <Canvas camera={{ position: [0, 2.2, 8], fov: 54 }} dpr={[1, 1.5]}>
+        <color attach="background" args={['#020617']} />
+        <fog attach="fog" args={['#020617', 8, 34]} />
+        <ambientLight intensity={0.24} />
+        <hemisphereLight color="#9dd8ff" groundColor="#111827" intensity={0.58} />
+        <directionalLight position={[4, 8, 7]} color="#a78bfa" intensity={1.08} />
+        <pointLight position={[-7, 2, -2]} color="#22d3ee" intensity={1.52} />
+        <pointLight position={[5.5, 4.8, -10]} color="#60a5fa" intensity={0.86} />
+        <PineForest />
+        <DriftingMoon />
+      </Canvas>
     </div>
   )
 }

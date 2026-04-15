@@ -49,7 +49,6 @@ interface MobileTapTransition {
 }
 
 type WindowStateMap = Record<DesktopAppId, WindowState>
-type WallpaperLoadPhase = 'loading' | 'ready' | 'error'
 
 const ICON_WEIGHT: IconWeight = 'regular'
 
@@ -70,9 +69,6 @@ const INITIAL_WINDOW_POSITIONS: Record<DesktopAppId, WindowPosition> = {
 }
 
 const DESKTOP_MEDIA_QUERY = '(max-width: 900px)'
-const WALLPAPER_LOAD_TIMEOUT_MS = 8_000
-
-let hasResolvedInitialWallpaperGate = false
 
 const getInitialIsMobile = (): boolean => window.matchMedia(DESKTOP_MEDIA_QUERY).matches
 
@@ -415,57 +411,6 @@ function MobileTabPage({
   )
 }
 
-function WallpaperLoadingScreen({ translate }: { translate: (key: string) => string }) {
-  return (
-    <div className="relative z-20 flex min-h-screen items-center justify-center px-6">
-      <div
-        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-300/25 bg-slate-950/78 px-6 py-5 shadow-[0_20px_55px_rgba(2,6,23,0.72)] backdrop-blur-md"
-        role="status"
-        aria-live="polite"
-      >
-        <span className="h-7 w-7 animate-spin rounded-full border-2 border-sky-200/30 border-t-sky-200" />
-        <p className="text-sm text-slate-100">{translate('loading.message')}</p>
-      </div>
-    </div>
-  )
-}
-
-function WallpaperErrorScreen({
-  translate,
-  onRetry,
-  onContinueWithoutWallpaper,
-}: {
-  translate: (key: string) => string
-  onRetry: () => void
-  onContinueWithoutWallpaper: () => void
-}) {
-  return (
-    <div className="relative z-20 flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-2xl border border-rose-300/35 bg-slate-950/82 p-6 text-center shadow-[0_24px_60px_rgba(2,6,23,0.76)] backdrop-blur-md">
-        <h2 className="text-lg text-slate-100">{translate('loading.errorTitle')}</h2>
-        <p className="mt-2 text-sm text-slate-300">{translate('loading.errorDescription')}</p>
-
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg border border-sky-300/55 bg-sky-400/16 px-4 py-2 text-sm text-sky-100 transition hover:bg-sky-400/25"
-          >
-            {translate('loading.retry')}
-          </button>
-          <button
-            type="button"
-            onClick={onContinueWithoutWallpaper}
-            className="rounded-lg border border-slate-200/30 bg-slate-900/70 px-4 py-2 text-sm text-slate-100 transition hover:bg-slate-800/80"
-          >
-            {translate('loading.continueWithoutWallpaper')}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
@@ -473,14 +418,6 @@ export function DesktopPortfolio() {
   const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
-  const [isInitialWallpaperGateActive, setIsInitialWallpaperGateActive] = useState(
-    () => !hasResolvedInitialWallpaperGate,
-  )
-  const [wallpaperLoadPhase, setWallpaperLoadPhase] = useState<WallpaperLoadPhase>(() =>
-    hasResolvedInitialWallpaperGate ? 'ready' : 'loading',
-  )
-  const [isWallpaperEnabled, setIsWallpaperEnabled] = useState(true)
-  const [wallpaperRetryToken, setWallpaperRetryToken] = useState(0)
 
   const zIndexRef = useRef(80)
   const mobilePagesRef = useRef<HTMLDivElement>(null)
@@ -514,55 +451,6 @@ export function DesktopPortfolio() {
     return () => {
       window.clearInterval(intervalId)
     }
-  }, [])
-
-  useEffect(() => {
-    if (!isInitialWallpaperGateActive || !isWallpaperEnabled || wallpaperLoadPhase !== 'loading') {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setWallpaperLoadPhase('error')
-    }, WALLPAPER_LOAD_TIMEOUT_MS)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [isInitialWallpaperGateActive, isWallpaperEnabled, wallpaperLoadPhase])
-
-  const handleWallpaperReady = useCallback(() => {
-    setWallpaperLoadPhase('ready')
-
-    setIsInitialWallpaperGateActive((current) => {
-      if (!current) {
-        return current
-      }
-
-      hasResolvedInitialWallpaperGate = true
-      return false
-    })
-  }, [])
-
-  const handleWallpaperError = useCallback(() => {
-    if (hasResolvedInitialWallpaperGate) {
-      setIsWallpaperEnabled(false)
-      return
-    }
-
-    setWallpaperLoadPhase('error')
-  }, [])
-
-  const retryWallpaperLoad = useCallback(() => {
-    setIsWallpaperEnabled(true)
-    setWallpaperLoadPhase('loading')
-    setWallpaperRetryToken((current) => current + 1)
-  }, [])
-
-  const continueWithoutWallpaper = useCallback(() => {
-    hasResolvedInitialWallpaperGate = true
-    setIsWallpaperEnabled(false)
-    setWallpaperLoadPhase('ready')
-    setIsInitialWallpaperGateActive(false)
   }, [])
 
   const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
@@ -785,33 +673,13 @@ export function DesktopPortfolio() {
     mobileEntrySyncRef.current = true
   }, [activeMobileTab, isMobile, scrollMobileToTab])
 
-  const showBlockingLoadingScreen = isInitialWallpaperGateActive && wallpaperLoadPhase === 'loading'
-  const showBlockingErrorScreen = isInitialWallpaperGateActive && wallpaperLoadPhase === 'error'
-  const showPortfolioInterface = !isInitialWallpaperGateActive || wallpaperLoadPhase === 'ready'
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">
-      {isWallpaperEnabled ? (
-        <PlasmaWallpaper
-          key={wallpaperRetryToken}
-          onReady={handleWallpaperReady}
-          onError={handleWallpaperError}
-        />
-      ) : null}
+      <PlasmaWallpaper />
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/80" />
 
-      {showBlockingLoadingScreen ? <WallpaperLoadingScreen translate={translate} /> : null}
-      {showBlockingErrorScreen ? (
-        <WallpaperErrorScreen
-          translate={translate}
-          onRetry={retryWallpaperLoad}
-          onContinueWithoutWallpaper={continueWithoutWallpaper}
-        />
-      ) : null}
-
-      {showPortfolioInterface ? (
-        <div className="relative z-10 min-h-screen">
-          {isMobile ? (
+      <div className="relative z-10 min-h-screen">
+        {isMobile ? (
           <>
             <header className="absolute inset-x-0 top-0 z-50 flex justify-center px-4 pt-2">
               <span className="rounded-full border border-slate-200/25 bg-slate-900/70 px-4 py-1 text-xs tracking-[0.2em] text-slate-100">
@@ -864,7 +732,7 @@ export function DesktopPortfolio() {
               </div>
             </nav>
           </>
-          ) : (
+        ) : (
           <>
             <header className="absolute inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/20 bg-slate-950/55 px-4 py-3 backdrop-blur-md md:px-6">
               <div>
@@ -983,9 +851,8 @@ export function DesktopPortfolio() {
               </div>
             </nav>
           </>
-          )}
-        </div>
-      ) : null}
+        )}
+      </div>
     </div>
   )
 }
