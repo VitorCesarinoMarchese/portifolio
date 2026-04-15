@@ -1,6 +1,11 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { Group, Mesh } from 'three'
+
+interface PlasmaWallpaperProps {
+  onReady?: () => void
+  onError?: () => void
+}
 
 interface TreeConfig {
   position: [number, number, number]
@@ -18,6 +23,30 @@ interface TreeConfig {
 const pseudoRandom = (seed: number): number => {
   const value = Math.sin(seed * 12.9898) * 43758.5453
   return value - Math.floor(value)
+}
+
+const checkWebglSupport = (): boolean => {
+  if (typeof document === 'undefined') {
+    return true
+  }
+
+  const canvas = document.createElement('canvas')
+  return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
+}
+
+function ReadySignal({ onReady }: { onReady?: () => void }) {
+  const didNotifyRef = useRef(false)
+
+  useFrame(() => {
+    if (didNotifyRef.current) {
+      return
+    }
+
+    didNotifyRef.current = true
+    onReady?.()
+  })
+
+  return null
 }
 
 function PineForest() {
@@ -150,7 +179,19 @@ function DriftingMoon() {
   )
 }
 
-export function PlasmaWallpaper() {
+export function PlasmaWallpaper({ onReady, onError }: PlasmaWallpaperProps) {
+  const webglSupported = useMemo(() => checkWebglSupport(), [])
+
+  useEffect(() => {
+    if (!webglSupported) {
+      onError?.()
+    }
+  }, [onError, webglSupported])
+
+  if (!webglSupported) {
+    return null
+  }
+
   return (
     <div className="pointer-events-none absolute inset-0">
       <Canvas camera={{ position: [0, 2.2, 8], fov: 54 }} dpr={[1, 1.5]}>
@@ -163,6 +204,7 @@ export function PlasmaWallpaper() {
         <pointLight position={[5.5, 4.8, -10]} color="#60a5fa" intensity={0.86} />
         <PineForest />
         <DriftingMoon />
+        <ReadySignal onReady={onReady} />
       </Canvas>
     </div>
   )
