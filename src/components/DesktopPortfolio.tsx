@@ -193,14 +193,16 @@ function ProjectsView({ locale, translate }: AppViewProps) {
           </ul>
 
           <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-100">
-            <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-lg border border-cyan-300/40 bg-cyan-400/15 px-3 py-1.5 transition hover:bg-cyan-400/30"
-            >
-              {translate('projects.demo')}
-            </a>
+            {project.liveUrl ? (
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-cyan-300/40 bg-cyan-400/15 px-3 py-1.5 transition hover:bg-cyan-400/30"
+              >
+                {translate('projects.demo')}
+              </a>
+            ) : null}
             <a
               href={project.repoUrl}
               target="_blank"

@@ -2,7 +2,7 @@ export const resources = {
   en: {
     translation: {
       desktop: {
-        environment: 'KDE-inspired portfolio desktop',
+        environment: 'The desktop portfolio',
         language: 'Language',
         open: 'Open',
         close: 'Close',
@@ -45,7 +45,7 @@ export const resources = {
         },
       },
       projects: {
-        intro: 'Selected work and case studies',
+        intro: 'Selected projects',
         demo: 'Live demo',
         source: 'Source code',
       },
@@ -73,7 +73,7 @@ export const resources = {
   pt: {
     translation: {
       desktop: {
-        environment: 'Desktop de portfolio inspirado no KDE',
+        environment: 'O portfolio desktop ',
         language: 'Idioma',
         open: 'Abrir',
         close: 'Fechar',
@@ -116,7 +116,7 @@ export const resources = {
         },
       },
       projects: {
-        intro: 'Projetos selecionados e estudos de caso',
+        intro: 'Projetos selecionados',
         demo: 'Demo',
         source: 'Codigo fonte',
       },

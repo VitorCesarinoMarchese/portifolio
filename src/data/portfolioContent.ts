@@ -10,7 +10,7 @@ export interface PortfolioProject {
   title: LocalizedText
   description: LocalizedText
   stack: string[]
-  liveUrl: string
+  liveUrl?: string
   repoUrl: string
 }
 
@@ -28,7 +28,7 @@ export interface SkillGroup {
 }
 
 export const profile = {
-  name: 'Your Name',
+  name: 'Vitor Cesarino Marchese',
   role: {
     en: 'Full Stack Developer',
     pt: 'Desenvolvedor Full Stack',
@@ -39,8 +39,8 @@ export const profile = {
       pt: 'Eu projeto e desenvolvo produtos web modernos com forte foco em experiencia de usuario e arquitetura sustentavel.',
     },
     {
-      en: 'This portfolio is intentionally built as a KDE-inspired desktop to showcase engineering, visual design, and interaction systems together.',
-      pt: 'Este portfolio foi criado como um desktop inspirado no KDE para demonstrar engenharia, design visual e sistemas de interacao no mesmo produto.',
+      en: 'This portfolio is intentionally built as a KDE Plasma inspired desktop to showcase engineering, visual design, and interaction systems together.',
+      pt: 'Este portfolio foi criado como um desktop inspirado no KDE Plasma para demonstrar engenharia, design visual e sistemas de interacao no mesmo produto.',
     },
   ] satisfies LocalizedText[],
 }
@@ -61,32 +61,31 @@ export const projects: PortfolioProject[] = [
     repoUrl: 'https://github.com/your-user/plasma-commerce',
   },
   {
-    id: 'aurora-api',
+    id: 'chat-terminal',
     title: {
-      en: 'Aurora API Platform',
-      pt: 'Plataforma de API Aurora',
+      en: 'Chat Terminal',
+      pt: 'Chat Terminal',
     },
     description: {
-      en: 'Service-oriented backend platform for authentication, billing workflows, and partner integrations.',
-      pt: 'Plataforma de backend orientada a servicos para autenticacao, fluxo de cobranca e integracoes com parceiros.',
+      en: 'A chat application for the terminal, using Go for the TUI and typescript for the backend.',
+      pt: 'Uma aplicação de chat para o terminal, usando Go para a TUI e TypeScript para o backend.',
     },
-    stack: ['Go', 'PostgreSQL', 'Docker', 'Redis'],
-    liveUrl: 'https://example.com/aurora-api',
-    repoUrl: 'https://github.com/your-user/aurora-api',
+    stack: ['Go', 'TypeScript', 'Redis', 'SQL'],
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/chat-terminal',
   },
   {
-    id: 'lumen-ui',
+    id: 'portfolio',
     title: {
-      en: 'Lumen UI System',
-      pt: 'Sistema de UI Lumen',
+      en: 'Portfolio',
+      pt: 'Portfolio',
     },
     description: {
-      en: 'Reusable component system and documentation portal built for multi-product consistency.',
-      pt: 'Sistema reutilizavel de componentes e portal de documentacao construido para consistencia entre produtos.',
+      en: 'Portfolio inspired by KDE Plasma desktop enviroment',
+      pt: 'Portfólio inspirado no ambiente de desktop KDE Plasma',
     },
-    stack: ['React', 'Storybook', 'Vite', 'Vitest'],
-    liveUrl: 'https://example.com/lumen-ui',
-    repoUrl: 'https://github.com/your-user/lumen-ui',
+    stack: ['React', 'TypeScript', 'Tailwind CSS', 'Three.js'],
+    liveUrl: 'https://example.com/aurora-api',
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/portifolio',
   },
 ]
 
@@ -94,20 +93,20 @@ export const contacts: ContactLink[] = [
   {
     id: 'email',
     label: 'Email',
-    value: 'youremail@example.com',
-    href: 'mailto:youremail@example.com',
+    value: 'vitorcesarino1@gmail.com',
+    href: 'mailto:vitorcesarino1@gmail.com',
   },
   {
     id: 'github',
     label: 'GitHub',
-    value: 'github.com/your-user',
-    href: 'https://github.com/your-user',
+    value: 'github.com/VitorCesarinoMarchese',
+    href: 'https://github.com/VitorCesarinoMarchese',
   },
   {
     id: 'linkedin',
     label: 'LinkedIn',
-    value: 'linkedin.com/in/your-user',
-    href: 'https://www.linkedin.com/in/your-user',
+    value: 'linkedin.com/in/vitor-cesarino',
+    href: 'https://www.linkedin.com/in/vitor-cesarino/',
   },
 ]
 
@@ -118,7 +117,7 @@ export const skillGroups: SkillGroup[] = [
       en: 'Frontend',
       pt: 'Frontend',
     },
-    items: ['React', 'TypeScript', 'Tailwind CSS', 'Three.js', 'Accessibility'],
+    items: ['React', 'TypeScript', 'Tailwind CSS', 'Next.js', 'HTML/CSS'],
   },
   {
     id: 'backend',
@@ -126,7 +125,7 @@ export const skillGroups: SkillGroup[] = [
       en: 'Backend',
       pt: 'Backend',
     },
-    items: ['Node.js', 'Go', 'REST APIs', 'PostgreSQL', 'Redis'],
+    items: ['Node.js', 'Express', 'REST APIs', 'MongoDB', 'SQL'],
   },
   {
     id: 'tooling',
@@ -134,7 +133,7 @@ export const skillGroups: SkillGroup[] = [
       en: 'Tooling',
       pt: 'Ferramentas',
     },
-    items: ['Docker', 'GitHub Actions', 'ESLint', 'Vite', 'Figma'],
+    items: ['Docker', 'Git', 'Linux', 'Vite', 'Figma'],
   },
 ]
 
