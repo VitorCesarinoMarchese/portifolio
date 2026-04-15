@@ -20,6 +20,13 @@ export const resources = {
         homeTitle: 'Android-inspired home',
         homeSubtitle: 'Tap an app to open it in full-screen card mode.',
       },
+      loading: {
+        message: 'Preparing my portfolio...',
+        errorTitle: 'Could not load the 3D wallpaper',
+        errorDescription: 'WebGL did not initialize correctly on this browser or device.',
+        retry: 'Retry',
+        continueWithoutWallpaper: 'Continue without wallpaper',
+      },
       apps: {
         projects: {
           title: 'Projects',
@@ -83,6 +90,13 @@ export const resources = {
         back: 'Voltar',
         homeTitle: 'Inicio inspirado no Android',
         homeSubtitle: 'Toque em um app para abrir no modo de cartao em tela cheia.',
+      },
+      loading: {
+        message: 'Preparando meu portfolio...',
+        errorTitle: 'Nao foi possivel carregar o wallpaper 3D',
+        errorDescription: 'O WebGL nao iniciou corretamente neste navegador ou dispositivo.',
+        retry: 'Tentar novamente',
+        continueWithoutWallpaper: 'Continuar sem wallpaper',
       },
       apps: {
         projects: {

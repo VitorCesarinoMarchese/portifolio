@@ -49,6 +49,7 @@ interface MobileTapTransition {
 }
 
 type WindowStateMap = Record<DesktopAppId, WindowState>
+type WallpaperLoadPhase = 'loading' | 'ready' | 'error'
 
 const ICON_WEIGHT: IconWeight = 'regular'
 
@@ -69,6 +70,10 @@ const INITIAL_WINDOW_POSITIONS: Record<DesktopAppId, WindowPosition> = {
 }
 
 const DESKTOP_MEDIA_QUERY = '(max-width: 900px)'
+const WALLPAPER_LOAD_TIMEOUT_MS = 8_000
+const WALLPAPER_FADE_DURATION_MS = 220
+
+let hasResolvedInitialWallpaperGate = false
 
 const getInitialIsMobile = (): boolean => window.matchMedia(DESKTOP_MEDIA_QUERY).matches
 
@@ -411,6 +416,65 @@ function MobileTabPage({
   )
 }
 
+function LoadingGateOverlay({
+  translate,
+  isFading,
+}: {
+  translate: (key: string) => string
+  isFading: boolean
+}) {
+  return (
+    <div
+      className={`absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-900/95 px-6 transition-opacity duration-200 ${
+        isFading ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
+      <div className="w-full max-w-md rounded-2xl border border-sky-300/35 bg-slate-900/62 px-6 py-5 shadow-[0_0_30px_rgba(56,189,248,0.18),0_24px_56px_rgba(2,6,23,0.78)] backdrop-blur-xl">
+        <div className="flex items-center gap-3">
+          <span className="h-7 w-7 animate-spin rounded-full border-2 border-sky-200/25 border-t-sky-200" />
+          <p className="text-sm text-slate-100">{translate('loading.message')}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LoadingGateErrorOverlay({
+  translate,
+  onRetry,
+  onContinueWithoutWallpaper,
+}: {
+  translate: (key: string) => string
+  onRetry: () => void
+  onContinueWithoutWallpaper: () => void
+}) {
+  return (
+    <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-900/95 px-6">
+      <div className="w-full max-w-md rounded-2xl border border-amber-300/45 bg-slate-900/62 px-6 py-5 shadow-[0_0_28px_rgba(251,191,36,0.12),0_24px_56px_rgba(2,6,23,0.78)] backdrop-blur-xl">
+        <h2 className="text-base text-slate-100">{translate('loading.errorTitle')}</h2>
+        <p className="mt-2 text-sm text-slate-300">{translate('loading.errorDescription')}</p>
+
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-lg border border-sky-300/55 bg-sky-400/16 px-4 py-2 text-sm text-sky-100 transition hover:bg-sky-400/25"
+          >
+            {translate('loading.retry')}
+          </button>
+          <button
+            type="button"
+            onClick={onContinueWithoutWallpaper}
+            className="rounded-lg border border-slate-200/30 bg-slate-900/70 px-4 py-2 text-sm text-slate-100 transition hover:bg-slate-800/80"
+          >
+            {translate('loading.continueWithoutWallpaper')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function DesktopPortfolio() {
   const { t, i18n } = useTranslation()
 
@@ -418,12 +482,25 @@ export function DesktopPortfolio() {
   const [activeMobileTab, setActiveMobileTab] = useState<DesktopAppId>('about')
   const [isMobile, setIsMobile] = useState(getInitialIsMobile)
   const [clockLabel, setClockLabel] = useState(() => formatClock(new Date()))
+  const [isInitialWallpaperGateActive, setIsInitialWallpaperGateActive] = useState(
+    () => !hasResolvedInitialWallpaperGate,
+  )
+  const [wallpaperLoadPhase, setWallpaperLoadPhase] = useState<WallpaperLoadPhase>(() =>
+    hasResolvedInitialWallpaperGate ? 'ready' : 'loading',
+  )
+  const [isWallpaperEnabled, setIsWallpaperEnabled] = useState(true)
+  const [wallpaperRetryToken, setWallpaperRetryToken] = useState(0)
+  const [isLoadingOverlayVisible, setIsLoadingOverlayVisible] = useState(
+    () => !hasResolvedInitialWallpaperGate,
+  )
+  const [isLoadingOverlayFading, setIsLoadingOverlayFading] = useState(false)
 
   const zIndexRef = useRef(80)
   const mobilePagesRef = useRef<HTMLDivElement>(null)
   const mobilePageRefs = useRef<Array<HTMLDivElement | null>>([])
   const mobileEntrySyncRef = useRef(false)
   const mobileTapTransitionRef = useRef<MobileTapTransition | null>(null)
+  const overlayFadeTimeoutRef = useRef<number | null>(null)
 
   const locale = resolveLocale(i18n.language)
 
@@ -452,6 +529,97 @@ export function DesktopPortfolio() {
       window.clearInterval(intervalId)
     }
   }, [])
+
+  useEffect(() => {
+    return () => {
+      if (overlayFadeTimeoutRef.current !== null) {
+        window.clearTimeout(overlayFadeTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  const resolveInitialWallpaperGate = useCallback(() => {
+    if (hasResolvedInitialWallpaperGate) {
+      return
+    }
+
+    hasResolvedInitialWallpaperGate = true
+    setIsInitialWallpaperGateActive(false)
+  }, [])
+
+  useEffect(() => {
+    if (!isInitialWallpaperGateActive || wallpaperLoadPhase !== 'loading' || !isWallpaperEnabled) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setWallpaperLoadPhase('error')
+      setIsLoadingOverlayVisible(true)
+      setIsLoadingOverlayFading(false)
+    }, WALLPAPER_LOAD_TIMEOUT_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [isInitialWallpaperGateActive, isWallpaperEnabled, wallpaperLoadPhase])
+
+  const startOverlayFadeOut = useCallback(() => {
+    if (overlayFadeTimeoutRef.current !== null) {
+      window.clearTimeout(overlayFadeTimeoutRef.current)
+    }
+
+    setIsLoadingOverlayFading(true)
+    overlayFadeTimeoutRef.current = window.setTimeout(() => {
+      setIsLoadingOverlayVisible(false)
+      setIsLoadingOverlayFading(false)
+      overlayFadeTimeoutRef.current = null
+    }, WALLPAPER_FADE_DURATION_MS)
+  }, [])
+
+  const handleWallpaperReady = useCallback(() => {
+    setWallpaperLoadPhase('ready')
+    if (hasResolvedInitialWallpaperGate) {
+      return
+    }
+
+    setIsLoadingOverlayVisible(true)
+    setIsLoadingOverlayFading(false)
+    resolveInitialWallpaperGate()
+    startOverlayFadeOut()
+  }, [resolveInitialWallpaperGate, startOverlayFadeOut])
+
+  const handleWallpaperError = useCallback(() => {
+    if (hasResolvedInitialWallpaperGate) {
+      setIsWallpaperEnabled(false)
+      return
+    }
+
+    setWallpaperLoadPhase('error')
+    setIsLoadingOverlayVisible(true)
+    setIsLoadingOverlayFading(false)
+  }, [])
+
+  const retryWallpaperLoad = useCallback(() => {
+    if (overlayFadeTimeoutRef.current !== null) {
+      window.clearTimeout(overlayFadeTimeoutRef.current)
+      overlayFadeTimeoutRef.current = null
+    }
+
+    setIsWallpaperEnabled(true)
+    setWallpaperLoadPhase('loading')
+    setWallpaperRetryToken((current) => current + 1)
+    setIsLoadingOverlayVisible(true)
+    setIsLoadingOverlayFading(false)
+  }, [])
+
+  const continueWithoutWallpaper = useCallback(() => {
+    setIsWallpaperEnabled(false)
+    setWallpaperLoadPhase('ready')
+    setIsLoadingOverlayVisible(true)
+    setIsLoadingOverlayFading(false)
+    resolveInitialWallpaperGate()
+    startOverlayFadeOut()
+  }, [resolveInitialWallpaperGate, startOverlayFadeOut])
 
   const activeDesktopApp = useMemo<DesktopAppId | null>(() => {
     const openApps = APP_DEFINITIONS
@@ -673,13 +841,35 @@ export function DesktopPortfolio() {
     mobileEntrySyncRef.current = true
   }, [activeMobileTab, isMobile, scrollMobileToTab])
 
+  const showLoadingOverlay = isLoadingOverlayVisible && wallpaperLoadPhase === 'loading'
+  const showErrorOverlay = isLoadingOverlayVisible && wallpaperLoadPhase === 'error'
+  const showPortfolioInterface = !isInitialWallpaperGateActive || wallpaperLoadPhase === 'ready'
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">
-      <PlasmaWallpaper />
+      {isWallpaperEnabled ? (
+        <PlasmaWallpaper
+          key={wallpaperRetryToken}
+          onReady={handleWallpaperReady}
+          onError={handleWallpaperError}
+        />
+      ) : null}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/35 via-transparent to-slate-950/80" />
 
-      <div className="relative z-10 min-h-screen">
-        {isMobile ? (
+      {showLoadingOverlay ? (
+        <LoadingGateOverlay translate={translate} isFading={isLoadingOverlayFading} />
+      ) : null}
+      {showErrorOverlay ? (
+        <LoadingGateErrorOverlay
+          translate={translate}
+          onRetry={retryWallpaperLoad}
+          onContinueWithoutWallpaper={continueWithoutWallpaper}
+        />
+      ) : null}
+
+      {showPortfolioInterface ? (
+        <div className="relative z-10 min-h-screen">
+          {isMobile ? (
           <>
             <header className="absolute inset-x-0 top-0 z-50 flex justify-center px-4 pt-2">
               <span className="rounded-full border border-slate-200/25 bg-slate-900/70 px-4 py-1 text-xs tracking-[0.2em] text-slate-100">
@@ -732,7 +922,7 @@ export function DesktopPortfolio() {
               </div>
             </nav>
           </>
-        ) : (
+          ) : (
           <>
             <header className="absolute inset-x-0 top-0 z-50 flex items-center justify-between border-b border-slate-200/20 bg-slate-950/55 px-4 py-3 backdrop-blur-md md:px-6">
               <div>
@@ -851,8 +1041,9 @@ export function DesktopPortfolio() {
               </div>
             </nav>
           </>
-        )}
-      </div>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }
