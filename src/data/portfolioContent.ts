@@ -57,8 +57,7 @@ export const projects: PortfolioProject[] = [
       pt: 'App de câmbio com carteiras em USD/GBP, taxas em tempo real e histórico de transações.',
     },
     stack: ['Next', 'TypeScript', 'Tailwind', 'Node.js'],
-    liveUrl: 'https://example.com/plasma-commerce',
-    repoUrl: 'https://github.com/your-user/plasma-commerce',
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/Exchange_of_Currencies',
   },
   {
     id: 'chat-terminal',
@@ -84,8 +83,8 @@ export const projects: PortfolioProject[] = [
       pt: 'Portfólio inspirado no ambiente de desktop KDE Plasma',
     },
     stack: ['React', 'TypeScript', 'Tailwind CSS', 'Three.js'],
-    liveUrl: 'https://example.com/aurora-api',
-    repoUrl: 'https://github.com/VitorCesarinoMarchese/portifolio',
+    liveUrl: 'https://www.vitorcesarinomarchese.site/',
+    repoUrl: 'https://github.com/VitorCesarinoMarchese/portfolio',
   },
 ]
 
