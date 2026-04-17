@@ -1,0 +1,145 @@
+export const resources = {
+  en: {
+    translation: {
+      desktop: {
+        environment: 'The desktop portfolio',
+        language: 'Language',
+        open: 'Open',
+        close: 'Close',
+        minimize: 'Minimize',
+        maximize: 'Maximize',
+        restore: 'Restore',
+        clock: 'Clock',
+      },
+      panel: {
+        dock: 'Dock',
+      },
+      mobile: {
+        home: 'Home',
+        back: 'Back',
+        homeTitle: 'Android-inspired home',
+        homeSubtitle: 'Tap an app to open it in full-screen card mode.',
+      },
+      loading: {
+        message: 'Preparing my portfolio...',
+        errorTitle: 'Could not load the 3D wallpaper',
+        errorDescription: 'WebGL did not initialize correctly on this browser or device.',
+        retry: 'Retry',
+        continueWithoutWallpaper: 'Continue without wallpaper',
+      },
+      apps: {
+        projects: {
+          title: 'Projects',
+        },
+        about: {
+          title: 'About',
+        },
+        contact: {
+          title: 'Contact',
+        },
+        cv: {
+          title: 'CV',
+        },
+        skills: {
+          title: 'Skills',
+        },
+      },
+      projects: {
+        intro: 'Selected projects',
+        demo: 'Live demo',
+        source: 'Source code',
+      },
+      about: {
+        heading: 'About me',
+      },
+      contact: {
+        heading: 'Contact info',
+        description: 'Reach me through any channel below.',
+      },
+      cv: {
+        heading: 'Curriculum Vitae',
+        description: 'Preview the CV inline and download the same file.',
+        previewTitle: 'CV preview',
+        previewFallback: 'If your browser cannot render the preview, use the download button below.',
+        updatedLabel: 'Updated',
+        download: 'Download CV',
+      },
+      skills: {
+        heading: 'Skills snapshot',
+        description: 'Core technologies grouped by area.',
+      },
+    },
+  },
+  pt: {
+    translation: {
+      desktop: {
+        environment: 'O portfolio desktop ',
+        language: 'Idioma',
+        open: 'Abrir',
+        close: 'Fechar',
+        minimize: 'Minimizar',
+        maximize: 'Maximizar',
+        restore: 'Restaurar',
+        clock: 'Relogio',
+      },
+      panel: {
+        dock: 'Dock',
+      },
+      mobile: {
+        home: 'Inicio',
+        back: 'Voltar',
+        homeTitle: 'Inicio inspirado no Android',
+        homeSubtitle: 'Toque em um app para abrir no modo de cartao em tela cheia.',
+      },
+      loading: {
+        message: 'Preparando meu portfolio...',
+        errorTitle: 'Nao foi possivel carregar o wallpaper 3D',
+        errorDescription: 'O WebGL nao iniciou corretamente neste navegador ou dispositivo.',
+        retry: 'Tentar novamente',
+        continueWithoutWallpaper: 'Continuar sem wallpaper',
+      },
+      apps: {
+        projects: {
+          title: 'Projetos',
+        },
+        about: {
+          title: 'Sobre',
+        },
+        contact: {
+          title: 'Contato',
+        },
+        cv: {
+          title: 'CV',
+        },
+        skills: {
+          title: 'Skills',
+        },
+      },
+      projects: {
+        intro: 'Projetos selecionados',
+        demo: 'Demo',
+        source: 'Codigo fonte',
+      },
+      about: {
+        heading: 'Sobre mim',
+      },
+      contact: {
+        heading: 'Informacoes de contato',
+        description: 'Fale comigo por qualquer canal abaixo.',
+      },
+      cv: {
+        heading: 'Curriculum Vitae',
+        description: 'Visualize o CV inline e baixe o mesmo arquivo.',
+        previewTitle: 'Previa do CV',
+        previewFallback:
+          'Se o seu navegador nao renderizar a previa, use o botao de download abaixo.',
+        updatedLabel: 'Atualizado',
+        download: 'Baixar CV',
+      },
+      skills: {
+        heading: 'Resumo de skills',
+        description: 'Tecnologias principais agrupadas por area.',
+      },
+    },
+  },
+} as const
