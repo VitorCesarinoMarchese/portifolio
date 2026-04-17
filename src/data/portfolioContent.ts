@@ -47,16 +47,16 @@ export const profile = {
 
 export const projects: PortfolioProject[] = [
   {
-    id: 'plasma-commerce',
+    id: 'Exchange_of_Currencies',
     title: {
-      en: 'Plasma Commerce Dashboard',
-      pt: 'Dashboard Plasma Commerce',
+      en: 'A exchange of currencies',
+      pt: 'Um câmbio de moedas',
     },
     description: {
-      en: 'Admin dashboard with analytics, inventory control, and role-based access for e-commerce operations.',
-      pt: 'Dashboard administrativo com analiticos, controle de estoque e acesso por papeis para operacoes de e-commerce.',
+      en: 'Currency exchange app with USD/GBP wallets, live rates, and transaction history.',
+      pt: 'App de câmbio com carteiras em USD/GBP, taxas em tempo real e histórico de transações.',
     },
-    stack: ['React', 'TypeScript', 'Tailwind', 'Node.js'],
+    stack: ['Next', 'TypeScript', 'Tailwind', 'Node.js'],
     liveUrl: 'https://example.com/plasma-commerce',
     repoUrl: 'https://github.com/your-user/plasma-commerce',
   },
