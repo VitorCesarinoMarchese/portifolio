@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# KDE Plasma Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interactive portfolio inspired by the KDE Plasma desktop environment, built with React, TypeScript, Tailwind, and Three.js.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- KDE-style desktop interface with draggable app windows
+- Window controls for minimize, maximize, restore, and close
+- Tray behavior to focus/minimize apps
+- Android-inspired mobile mode with swipeable app pages and bottom dock
+- Three.js wallpaper scene with full-screen loading gate and fallback flow
+- Bilingual content (English and Portuguese) with in-app language toggle
+- CV app with inline preview plus localized files (`cv-en.pdf` and `cv-pt.pdf`)
+- Projects app where `liveUrl` is optional (projects without demo only show source link)
 
-## React Compiler
+## App Modules
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Projects
+- About
+- Skills
+- Contact
+- CV
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- Three.js + @react-three/fiber
+- i18next + react-i18next
+- Phosphor Icons
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev      # start development server
+npm run lint     # run eslint
+npm run build    # type-check and create production build
+npm run preview  # preview production build
 ```
+
+## Content and Customization
+
+Main content is managed in:
+
+- `src/data/portfolioContent.ts`
+
+Update this file to manage profile data, projects, contacts, skills, and CV sources.  
+For projects, use:
+
+- `liveUrl` (optional)
+- `repoUrl` (required)
+
+Translations are defined in:
+
+- `src/i18n/resources.ts`
+
+CV files are served from:
+
+- `public/cv-en.pdf`
+- `public/cv-pt.pdf`
